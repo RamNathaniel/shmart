@@ -52,13 +52,12 @@ smartsh setup --provider none
 
 The DeepSeek preset defaults to the rolling `deepseek-v4-flash` API model.
 
-For DeepSeek and other OpenAI-compatible endpoints, structured model replies are
-requested as a forced strict function call. The function parameters are the
-Smartsh JSON Schema, so suggestion menus always use the required
-`summary`/`suggestions` shape. If an endpoint does not support strict tools,
-Smartsh retries in JSON mode and validates the response locally. Official
-DeepSeek endpoints are routed through their `/beta` base automatically, as
-required for strict tool calls.
+Smartsh does not provide tools or terminal access to any model. For DeepSeek and
+other OpenAI-compatible endpoints, it sends ordinary system/user messages,
+requests JSON mode, and includes the expected schema as prompt text. If an
+endpoint does not implement JSON mode, Smartsh retries with prompt-only JSON
+instructions. Rust validates every response before rendering a menu or acting
+on a decision.
 
 For a custom endpoint:
 

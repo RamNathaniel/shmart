@@ -1043,6 +1043,13 @@ The LLM subsystem consists of:
 
 These functions can initially be served by one model, but the architecture should not assume they always will be.
 
+The model boundary is deliberately capability-free:
+
+1. Smartsh MUST NOT provide function tools, shell tools, filesystem tools, or network tools to any model.
+2. The model receives ordinary prompt messages containing the command line, relevant error output and limited terminal context, plus the expected JSON shape.
+3. The model returns inert JSON containing command options, explanations and optional recommendations.
+4. Rust parses and validates that JSON, renders the menu, applies policy and runs only the command selected or approved by the user.
+
 ---
 
 # 18. Model Output Contract

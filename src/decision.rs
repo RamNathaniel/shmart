@@ -86,9 +86,8 @@ fn schema_with_delegation(include_delegation: bool) -> Value {
             "additionalProperties": false
         }),
     ]);
-    // Keep the union at the root so every object variant can independently
-    // declare `additionalProperties: false`, as required by DeepSeek strict
-    // tool schemas.
+    // Keep the union at the root so every variant independently rejects fields
+    // belonging to a different action type.
     json!({"anyOf": variants})
 }
 

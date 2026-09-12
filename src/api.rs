@@ -9,7 +9,7 @@ use crate::{
     decision,
 };
 
-const LOCAL_SYSTEM: &str = r#"You are smartsh's fast immediate terminal router. You control a terminal through typed actions; you are not a source-code completion model.
+const LOCAL_SYSTEM: &str = r#"You are smartsh's fast immediate terminal router. You have no tools or terminal access and cannot execute commands; you only return JSON for the Rust host to interpret. You are not a source-code completion model.
 
 Choose exactly one next action:
 - run: one executable plus an argument array, for a clear terminal step.
@@ -20,11 +20,11 @@ Choose exactly one next action:
 
 Delegate when the task needs substantial reasoning, several uncertain steps, diagnosis after an error, or knowledge not present in the terminal state. Prefer a quick local run for obvious inspection commands. Never use sudo. Never hide a shell inside `sh -c`, `bash -c`, or similar; use the shell action instead. Do not claim a command succeeded until its result appears in the state. Return only one JSON object matching the supplied schema."#;
 
-const CLOUD_SYSTEM: &str = r#"You are the careful reasoning tier for smartsh, a terminal assistant. Given the user's goal and terminal observations, choose exactly one next action as JSON: run, shell, answer, or clarify. Do not delegate again. Prefer portable commands, use one executable with an argument array when possible, and reserve shell for necessary pipelines or redirection. Never use sudo. Do not claim success without command output. Return only one JSON object matching the supplied schema."#;
+const CLOUD_SYSTEM: &str = r#"You are the careful reasoning tier for smartsh, a terminal assistant. You have no tools or terminal access and cannot execute commands; you only return JSON for the Rust host to interpret. Given the user's goal and terminal observations, choose exactly one next action as JSON: run, shell, answer, or clarify. Do not delegate again. Prefer portable commands, use one executable with an argument array when possible, and reserve shell for necessary pipelines or redirection. Never use sudo. Do not claim success without command output. Return only one JSON object matching the supplied schema."#;
 
-const LOCAL_HEAVY_SYSTEM: &str = r#"You are smartsh's only available reasoning tier. Work through the terminal task carefully using the supplied observations. Choose exactly one next action as JSON: run, shell, answer, or clarify. Cloud delegation is unavailable, so you must not delegate. Prefer portable commands, use one executable with an argument array when possible, and reserve shell for necessary pipelines or redirection. Never use sudo. Do not claim success without command output. Return only one JSON object matching the supplied schema."#;
+const LOCAL_HEAVY_SYSTEM: &str = r#"You are smartsh's only available reasoning tier. You have no tools or terminal access and cannot execute commands; you only return JSON for the Rust host to interpret. Work through the terminal task carefully using the supplied observations. Choose exactly one next action as JSON: run, shell, answer, or clarify. Cloud delegation is unavailable, so you must not delegate. Prefer portable commands, use one executable with an argument array when possible, and reserve shell for necessary pipelines or redirection. Never use sudo. Do not claim success without command output. Return only one JSON object matching the supplied schema."#;
 
-const SUGGESTION_SYSTEM: &str = r#"You are smartsh's command-repair assistant. Return a concise menu with two to four useful shell-command suggestions. Correct invalid commands using the supplied error output, or translate an explicit `shmart` request into commands. The response must have exactly this shape: {"summary":"...","suggestions":[{"command":"...","explanation":"..."}],"fyi":[{"name":"...","purpose":"...","install":"..."}]}. Each suggestion must include the exact command and a short explanation. Add up to three relevant optional tools in `fyi` that the user could install to improve this task; give the tool name, its purpose, and a platform-appropriate install command, but do not recommend tools when none are useful. Do not recommend a tool that is already clearly available. Prefer portable, non-destructive commands. Never include sudo. FYI entries are informational and must never be executed automatically. When the smartsh_suggestions function is supplied, call it exactly once."#;
+const SUGGESTION_SYSTEM: &str = r#"You are smartsh's command-repair assistant. You have no tools or terminal access and cannot execute commands; you only return JSON for the Rust host to interpret. Return a concise menu with two to four useful shell-command suggestions. Correct invalid commands using the supplied error output, or translate an explicit `shmart` request into commands. The response must have exactly this shape: {"summary":"...","suggestions":[{"command":"...","explanation":"..."}],"fyi":[{"name":"...","purpose":"...","install":"..."}]}. Each suggestion must include the exact command and a short explanation. Add up to three relevant optional tools in `fyi` that the user could install to improve this task; give the tool name, its purpose, and a platform-appropriate install command, but do not recommend tools when none are useful. Do not recommend a tool that is already clearly available. Prefer portable, non-destructive commands. Never include sudo. FYI entries are informational and must never be executed automatically."#;
 
 pub struct ModelApi {
     client: Client,
@@ -37,9 +37,7 @@ struct OpenAiRequest<'a> {
     system: &'a str,
     user: &'a str,
     timeout: Duration,
-    structured: bool,
-    decision_schema: Value,
-    schema_name: &'a str,
+    schema: Value,
     max_tokens: u64,
 }
 
@@ -62,9 +60,7 @@ impl ModelApi {
             system: LOCAL_SYSTEM,
             user: state,
             timeout: Duration::from_secs(config.local.timeout_seconds),
-            structured: true,
-            decision_schema: decision::schema(),
-            schema_name: "smartsh_decision",
+            schema: decision::schema(),
             max_tokens: 1024,
         })
         .await
@@ -79,9 +75,7 @@ impl ModelApi {
             system: LOCAL_HEAVY_SYSTEM,
             user: state,
             timeout: Duration::from_secs(config.local.timeout_seconds),
-            structured: true,
-            decision_schema: decision::execution_schema(),
-            schema_name: "smartsh_decision",
+            schema: decision::execution_schema(),
             max_tokens: 2048,
         })
         .await
@@ -96,9 +90,7 @@ impl ModelApi {
             system: SUGGESTION_SYSTEM,
             user: state,
             timeout: Duration::from_secs(config.local.timeout_seconds),
-            structured: true,
-            decision_schema: crate::suggestion::schema(),
-            schema_name: "smartsh_suggestions",
+            schema: crate::suggestion::schema(),
             max_tokens: 1536,
         })
         .await
@@ -121,9 +113,7 @@ impl ModelApi {
                     system: CLOUD_SYSTEM,
                     user: state,
                     timeout,
-                    structured: true,
-                    decision_schema: decision::execution_schema(),
-                    schema_name: "smartsh_decision",
+                    schema: decision::execution_schema(),
                     max_tokens: 1024,
                 })
                 .await
@@ -150,52 +140,12 @@ impl ModelApi {
             system,
             user,
             timeout,
-            structured,
-            decision_schema,
-            schema_name,
+            schema,
             max_tokens,
         } = request;
-        let original_endpoint = endpoint;
-        let mut request_endpoint = if structured && is_official_deepseek(endpoint) {
-            deepseek_beta_endpoint(endpoint)
-        } else {
-            endpoint.to_owned()
-        };
-        let mut body = json!({
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user}
-            ],
-            "temperature": 1.0,
-            "top_p": 0.95,
-            "max_tokens": max_tokens
-        });
-        if structured {
-            body["tools"] = json!([
-                {
-                    "type": "function",
-                    "function": {
-                        "name": schema_name,
-                        "description": "Return the structured smartsh response.",
-                        "parameters": decision_schema,
-                        "strict": true
-                    }
-                }
-            ]);
-            body["tool_choice"] = json!({
-                "type": "function",
-                "function": {"name": schema_name}
-            });
-            body["parallel_tool_calls"] = json!(false);
-            // DeepSeek does not allow a named tool choice while thinking mode is
-            // enabled. Disable it so the forced strict function call is honored.
-            if is_official_deepseek(endpoint) {
-                body["thinking"] = json!({"type": "disabled"});
-            }
-        }
+        let mut body = openai_json_body(model, system, user, &schema, max_tokens);
 
-        let send = |endpoint: &str, body: &Value| {
+        let send = |body: &Value| {
             let mut request = self.client.post(endpoint).timeout(timeout).json(body);
             if let Some(key) = api_key {
                 request = request.bearer_auth(key);
@@ -203,24 +153,15 @@ impl ModelApi {
             request.send()
         };
 
-        let mut response = send(&request_endpoint, &body)
-            .await
-            .context("model request failed")?;
-        if structured && response.status().is_client_error() {
-            // Some OpenAI-compatible servers implement chat but not strict tools.
+        let mut response = send(&body).await.context("model request failed")?;
+        if response.status().is_client_error() {
+            // Some local OpenAI-compatible servers do not implement JSON mode.
+            // The prompt still contains the schema, and Rust validates the reply.
             let object = body.as_object_mut().expect("JSON body is an object");
-            object.remove("tools");
-            object.remove("tool_choice");
-            object.remove("parallel_tool_calls");
-            if structured {
-                object.insert("response_format".into(), json!({"type": "json_object"}));
-            }
-            if request_endpoint != original_endpoint {
-                request_endpoint = original_endpoint.to_owned();
-            }
-            response = send(&request_endpoint, &body)
+            object.remove("response_format");
+            response = send(&body)
                 .await
-                .context("model retry without structured output failed")?;
+                .context("model retry without JSON mode failed")?;
         }
         let value = response_json(response).await?;
         openai_content(&value).context("model response did not include message content")
@@ -266,22 +207,28 @@ impl ModelApi {
     }
 }
 
-fn is_official_deepseek(endpoint: &str) -> bool {
-    endpoint.to_ascii_lowercase().contains("api.deepseek.com")
-}
-
-fn deepseek_beta_endpoint(endpoint: &str) -> String {
-    if endpoint.to_ascii_lowercase().contains("/beta/") {
-        return endpoint.to_owned();
-    }
-    if let Some(index) = endpoint.find("/chat/completions") {
-        return format!(
-            "{}/beta{}",
-            endpoint[..index].trim_end_matches('/'),
-            &endpoint[index..]
-        );
-    }
-    endpoint.to_owned()
+fn openai_json_body(
+    model: &str,
+    system: &str,
+    user: &str,
+    schema: &Value,
+    max_tokens: u64,
+) -> Value {
+    let system = format!(
+        "{system}\n\nReturn only JSON matching this schema:\n{}",
+        schema
+    );
+    json!({
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user}
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "max_tokens": max_tokens
+    })
 }
 
 fn immediate_api_key(config: &Config) -> Result<Option<String>> {
@@ -313,11 +260,6 @@ async fn response_json(response: Response) -> Result<Value> {
 }
 
 fn openai_content(value: &Value) -> Option<String> {
-    if let Some(arguments) =
-        value["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"].as_str()
-    {
-        return Some(arguments.to_owned());
-    }
     let content = &value["choices"][0]["message"]["content"];
     if let Some(text) = content.as_str() {
         return Some(text.to_owned());
@@ -387,24 +329,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn extracts_forced_tool_arguments_before_message_content() {
-        let value = json!({
-            "choices": [{
-                "message": {
-                    "content": "ignored",
-                    "tool_calls": [{
-                        "function": {
-                            "name": "smartsh_suggestions",
-                            "arguments": "{\"summary\":\"ok\",\"suggestions\":[]}"
-                        }
-                    }]
-                }
-            }]
-        });
-        assert_eq!(
-            openai_content(&value).as_deref(),
-            Some(r#"{"summary":"ok","suggestions":[]}"#)
+    fn json_request_contains_schema_but_no_tools() {
+        let schema = json!({"type": "object"});
+        let body = openai_json_body("model", "system", "command line", &schema, 512);
+        assert!(body.get("tools").is_none());
+        assert!(body.get("tool_choice").is_none());
+        assert!(body.get("parallel_tool_calls").is_none());
+        assert_eq!(body["response_format"]["type"], "json_object");
+        assert!(
+            body["messages"][0]["content"]
+                .as_str()
+                .is_some_and(|content| content.contains(r#"{"type":"object"}"#))
         );
+        assert_eq!(body["messages"][1]["content"], "command line");
     }
 
     #[test]
@@ -415,28 +352,6 @@ mod tests {
         assert_eq!(
             openai_content(&value).as_deref(),
             Some("{\"kind\":\"answer\"}")
-        );
-    }
-
-    #[test]
-    fn identifies_official_deepseek_endpoints() {
-        assert!(is_official_deepseek(
-            "https://api.deepseek.com/chat/completions",
-        ));
-        assert!(!is_official_deepseek(
-            "http://localhost:8080/v1/chat/completions"
-        ));
-    }
-
-    #[test]
-    fn maps_deepseek_chat_endpoint_to_beta_for_strict_tools() {
-        assert_eq!(
-            deepseek_beta_endpoint("https://api.deepseek.com/chat/completions"),
-            "https://api.deepseek.com/beta/chat/completions"
-        );
-        assert_eq!(
-            deepseek_beta_endpoint("https://api.deepseek.com/beta/chat/completions"),
-            "https://api.deepseek.com/beta/chat/completions"
         );
     }
 }
