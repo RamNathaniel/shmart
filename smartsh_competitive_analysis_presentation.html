@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smartsh Competitive Analysis & Market Landscape</title>
+<style>
+:root{
+  --bg:#08111f; --fg:#eff6ff; --muted:#a8b7ca; --line:#26364d;
+  --accent:#64e2ff; --accent2:#a78bfa; --good:#35d399; --warn:#fbbf24; --bad:#fb7185;
+  --panel:#101d30; --panel2:#0d1728; --white:#fff;
+}
+*{box-sizing:border-box} html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;}
+body{overflow:hidden;}
+.deck{height:100vh;width:100vw;position:relative;background:
+  radial-gradient(circle at 20% 10%, rgba(100,226,255,.20), transparent 30%),
+  radial-gradient(circle at 80% 90%, rgba(167,139,250,.22), transparent 32%),
+  linear-gradient(135deg,#07111f 0%, #0a1220 55%, #0e1830 100%);}
+.slide{position:absolute;inset:0;display:none;padding:5.5vh 6.5vw 6.5vh;}
+.slide.active{display:block;}
+h1{font-size:clamp(44px,5.6vw,88px);line-height:.98;margin:0 0 26px;letter-spacing:-.06em;}
+h2{font-size:clamp(34px,3.4vw,58px);line-height:1.04;margin:0 0 28px;letter-spacing:-.045em;}
+h3{font-size:clamp(22px,1.9vw,34px);margin:0 0 12px;letter-spacing:-.02em;}
+p,li{font-size:clamp(18px,1.5vw,25px);line-height:1.35;color:var(--muted);}
+ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-height:1.22;color:#dbeafe;max-width:1080px}.small{font-size:clamp(13px,1vw,16px);line-height:1.35}.tiny{font-size:12px;line-height:1.25}.muted{color:var(--muted)}.bright{color:var(--fg)}.accent{color:var(--accent)}.accent2{color:var(--accent2)}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.kicker{color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.16em;font-size:14px;margin-bottom:18px}.title-meta{font-size:20px;color:var(--muted);margin-top:22px}.tag{display:inline-block;border:1px solid rgba(100,226,255,.35);background:rgba(100,226,255,.08);padding:7px 11px;border-radius:999px;color:#dff9ff;font-size:14px;font-weight:700;margin:3px 5px 3px 0}.tag.purple{border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.11)}
+.grid{display:grid;gap:18px}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}.grid.four{grid-template-columns:repeat(4,1fr)}.card{background:linear-gradient(180deg,rgba(16,29,48,.92),rgba(9,17,30,.82));border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.22)}.card h3{color:#f8fafc}.card p,.card li{font-size:clamp(16px,1.2vw,20px)}
+.big-number{font-size:68px;font-weight:900;letter-spacing:-.06em;line-height:1;color:var(--accent)}
+.matrix{width:100%;border-collapse:collapse;background:rgba(16,29,48,.70);border-radius:16px;overflow:hidden;font-size:14px}.matrix th,.matrix td{border-bottom:1px solid rgba(255,255,255,.08);padding:9px 10px;text-align:left;vertical-align:top}.matrix th{background:rgba(255,255,255,.08);font-size:12px;color:#dbeafe;text-transform:uppercase;letter-spacing:.06em}.matrix td{color:#cbd5e1}.matrix .yes{color:var(--good);font-weight:800}.matrix .some{color:var(--warn);font-weight:800}.matrix .no{color:#94a3b8;font-weight:800}.matrix.compact th,.matrix.compact td{padding:7px 8px;font-size:12.5px}.scroll{max-height:68vh;overflow:auto;padding-right:8px}.quote{border-left:6px solid var(--accent);padding-left:24px;font-size:clamp(26px,2.8vw,48px);line-height:1.12;color:#e0f2fe;letter-spacing:-.03em}.footer{position:absolute;left:6.5vw;right:6.5vw;bottom:2.4vh;color:#64748b;font-size:12px;display:flex;justify-content:space-between;gap:16px}.progress{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}.nav{position:absolute;right:22px;bottom:18px;display:flex;gap:8px;z-index:10}.nav button{background:rgba(255,255,255,.10);color:#e2e8f0;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:9px 13px;font-weight:700;cursor:pointer}.nav button:hover{background:rgba(255,255,255,.18)}.pillrow{margin:22px 0}.split{display:grid;grid-template-columns:1.06fr .94fr;gap:34px;align-items:start}.diagram{border:1px solid rgba(255,255,255,.1);border-radius:26px;padding:28px;background:rgba(255,255,255,.05)}.flow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.node{padding:13px 16px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:18px;color:#e2e8f0;font-weight:800}.arrow{color:var(--accent);font-size:25px;font-weight:900}.axis{position:relative;height:280px;border-left:2px solid rgba(255,255,255,.25);border-bottom:2px solid rgba(255,255,255,.25);margin:30px 20px 10px}.axis .label-y{position:absolute;left:-12px;top:-28px;color:var(--muted);font-size:14px}.axis .label-x{position:absolute;right:0;bottom:-32px;color:var(--muted);font-size:14px}.dot{position:absolute;transform:translate(-50%,50%);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:#12233b;font-size:13px;font-weight:800;white-space:nowrap}.dot.smart{background:linear-gradient(90deg,rgba(100,226,255,.22),rgba(167,139,250,.25));border-color:var(--accent);color:#fff}.sources li{font-size:14px;line-height:1.28;margin-bottom:6px}.cols{columns:2;column-gap:30px}
+@media (max-width:900px){.grid.two,.grid.three,.grid.four,.split{grid-template-columns:1fr}.slide{padding:4vh 5vw 7vh}.cols{columns:1}.scroll{max-height:60vh}.matrix{font-size:12px}}
+@media print{body{overflow:visible;background:white}.deck{height:auto;background:white;color:#111}.slide{position:relative;display:block;page-break-after:always;height:100vh;background:#08111f}.nav,.progress{display:none}}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+  <section class="slide active">
+    <div class="kicker">Smartsh / Competitive Analysis</div>
+    <h1>AI-native shell assistance: crowded market, real opening.</h1>
+    <p class="lead">Competitive landscape, feature matrix, differentiation, and go/no-go recommendation for Smartsh.</p>
+    <div class="pillrow"><span class="tag">Linux + macOS</span><span class="tag purple">Rust shell frontend</span><span class="tag">Ambient LLM policy</span><span class="tag purple">Terminal-agnostic</span></div>
+    <p class="title-meta">Prepared September 2026</p>
+    <div class="footer"><span>Use ←/→ or buttons to navigate</span><span>1 / 25</span></div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Executive verdict</div>
+    <h2>Worth developing — but only if Smartsh avoids becoming “yet another AI command generator.”</h2>
+    <div class="grid three">
+      <div class="card"><div class="big-number">Yes</div><h3>Strong unmet need</h3><p>Developers still lose flow remembering flags, rediscovering syntax, and searching history. Current tools help, but most require explicit invocation or force a terminal/app migration.</p></div>
+      <div class="card"><div class="big-number">Narrow</div><h3>The winning wedge</h3><p>Ambient, proactive command-buffer intelligence that can complete, rewrite, explain, warn, or stay silent inside the user's current terminal.</p></div>
+      <div class="card"><div class="big-number">Risk</div><h3>Main failure mode</h3><p>If proactive suggestions are noisy or wrong, users will disable it. Intervention precision matters more than model cleverness.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Product thesis from the spec</div>
+    <h2>Smartsh owns intent and interaction, not Unix semantics.</h2>
+    <div class="split">
+      <div>
+        <p class="lead">The core idea is not “ask AI for a command.” It is a shell editing layer that observes what the user is already typing and decides the least intrusive useful action.</p>
+        <ul>
+          <li>Keep Bash/Zsh execution authority.</li>
+          <li>Keep the user's existing terminal emulator and mouse scrollback.</li>
+          <li>Stage every generated command visibly, with explanation and risk warning.</li>
+          <li>Use recent history, cwd, Git branch, command specs, and deterministic completions.</li>
+        </ul>
+      </div>
+      <div class="diagram">
+        <div class="flow"><span class="node">user types</span><span class="arrow">→</span><span class="node">Smartsh policy</span><span class="arrow">→</span><span class="node">nothing / completion / rewrite / explain / warn</span><span class="arrow">→</span><span class="node">real shell runs it</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Competitive map</div>
+    <h2>The landscape splits into six overlapping product families.</h2>
+    <div class="grid three">
+      <div class="card"><h3>AI terminal emulators</h3><p>Warp, Wave, iTerm2 AI, Termius/TermAI, Tabby plugins. They own the terminal surface and can add rich UI.</p></div>
+      <div class="card"><h3>AI command generators</h3><p>Amazon Q/Kiro CLI, Copilot CLI, ShellGPT, llm-cmd, AI Shell. Usually explicit prompt → generated command.</p></div>
+      <div class="card"><h3>Agentic coding CLIs</h3><p>Claude Code, Codex CLI, Gemini CLI, Aider, OpenCode. Great at repo tasks; not optimized for every shell keystroke.</p></div>
+      <div class="card"><h3>Autocomplete engines</h3><p>Fig specs, Amazon Q autocomplete, Inshellisense, Carapace, fish, zsh-autosuggestions. Fast, deterministic, limited semantic rewrite.</p></div>
+      <div class="card"><h3>History/context tools</h3><p>Atuin, fzf history, shell plugins. Excellent retrieval, weak intent translation.</p></div>
+      <div class="card"><h3>Persistence/remoting</h3><p>tmux, screen, Zellij, Mosh, Eternal Terminal. Solve disconnection, not command intelligence.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Closest direct competitor</div>
+    <h2>Warp is the strongest adjacent threat.</h2>
+    <div class="grid two">
+      <div class="card"><h3>Warp approach</h3><ul><li>Modern terminal emulator, not just shell plugin.</li><li>AI-assisted development environment with terminal, agent CLI, command suggestions, workflows, and agentic coding.</li><li>Can provide rich UI because it owns the terminal app.</li></ul></div>
+      <div class="card"><h3>Smartsh difference</h3><ul><li>No terminal migration required.</li><li>Preserves native terminal scrollback and mouse selection by design.</li><li>Focuses on command-editing policy: when to intervene, when not to.</li><li>Designed around local/private modes and shell compatibility.</li></ul></div>
+    </div>
+    <p class="small muted">Sources: Warp describes itself as an open platform/terminal for AI-assisted software development and documents natural-language command suggestions using <code>#</code>.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">AI terminal emulators</div>
+    <h2>Terminal apps can move faster on UI, but they create adoption friction.</h2>
+    <table class="matrix">
+      <thead><tr><th>Product</th><th>Approach</th><th>Strength</th><th>Weakness vs Smartsh</th></tr></thead>
+      <tbody>
+        <tr><td><b>Warp</b></td><td>AI-native terminal/app + agents.</td><td>Polished rich terminal UI, command blocks, workflows, agent features.</td><td>Requires adopting Warp; less “use any terminal.”</td></tr>
+        <tr><td><b>Wave</b></td><td>Open-source AI-integrated terminal with previews, editor, workspace features.</td><td>Works with multiple AI providers; includes durable SSH sessions.</td><td>Broad terminal/workspace replacement; Smartsh is narrower and terminal-agnostic.</td></tr>
+        <tr><td><b>iTerm2 AI</b></td><td>AI chat/prompt integrated into iTerm2.</td><td>Massive macOS terminal user base.</td><td>Explicit AI surfaces; macOS/iTerm-specific.</td></tr>
+        <tr><td><b>Termius / TermAI</b></td><td>AI inside SSH client, especially mobile/infra workflows.</td><td>Strong SSH/mobile use case; can ground on session output.</td><td>Not a general local shell frontend for existing terminal emulators.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Prompt-to-command CLIs</div>
+    <h2>These validate demand, but most still break typing flow.</h2>
+    <div class="scroll">
+    <table class="matrix">
+      <thead><tr><th>Product</th><th>Approach</th><th>What they solved</th><th>Gap Smartsh targets</th></tr></thead>
+      <tbody>
+        <tr><td><b>Amazon Q / Kiro CLI</b></td><td>Shell autocomplete + natural-language command translation.</td><td>Contextual CLI completions and AI in terminal.</td><td>Vendor/product direction changed; Smartsh can be model/vendor neutral and locally runnable.</td></tr>
+        <tr><td><b>GitHub Copilot CLI</b></td><td>Agentic CLI with commands, slash commands, hooks, permissions.</td><td>Strong GitHub/dev workflow integration.</td><td>Not built primarily as an ambient editor that watches every shell buffer.</td></tr>
+        <tr><td><b>ShellGPT</b></td><td><code>sgpt</code> command for shell commands, code snippets, docs.</td><td>Simple, portable, popular open-source utility.</td><td>Explicit invocation; limited deterministic completion/menu integration.</td></tr>
+        <tr><td><b>llm-cmd</b></td><td>LLM plugin that pre-populates a generated shell command.</td><td>Unix-philosophy composability; editable before execution.</td><td>Prompt-to-command, not proactive command-buffer policy.</td></tr>
+        <tr><td><b>AI Shell</b></td><td>Natural language to shell command, open source.</td><td>Clean single-purpose concept.</td><td>Does not own interactive completion/history/warning UX.</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Agentic coding CLIs</div>
+    <h2>Agents are powerful, but they are solving a different problem.</h2>
+    <div class="grid two">
+      <div class="card"><h3>Claude Code / Codex CLI / Gemini CLI / Aider</h3><p>These tools run inside the terminal and operate on a project: read code, edit files, run tests, use tools, and coordinate multi-step tasks.</p><p>They are becoming the developer's “AI worker.”</p></div>
+      <div class="card"><h3>Smartsh position</h3><p>Smartsh is not a coding agent. It is closer to an AI-native readline/ZLE layer: fast, ambient, command-oriented, and compatible with every tool, including those agents.</p><p>Smartsh can actually become the front door for running these agents.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Autocomplete and history incumbents</div>
+    <h2>The deterministic layer is mature — Smartsh should reuse it, not replace it.</h2>
+    <table class="matrix compact">
+      <thead><tr><th>Product</th><th>Core value</th><th>Best lesson for Smartsh</th></tr></thead>
+      <tbody>
+        <tr><td><b>Fig specs / Amazon Q autocomplete</b></td><td>Declarative command specs for subcommands, options, args.</td><td>Use structured specs to prevent hallucinated flags.</td></tr>
+        <tr><td><b>Inshellisense</b></td><td>IDE-style autocomplete for 600+ CLIs across shells/OSes.</td><td>Completion UI can be valuable without AI.</td></tr>
+        <tr><td><b>Carapace</b></td><td>Multi-shell completion bridge.</td><td>Bridge existing ecosystems rather than write every completion by hand.</td></tr>
+        <tr><td><b>fish autosuggestions</b></td><td>History/completion/path suggestions while typing.</td><td>Ghost text must be fast and unobtrusive.</td></tr>
+        <tr><td><b>zsh-autosuggestions</b></td><td>Fish-like autosuggestions for Zsh.</td><td>Users already understand non-executing suggestions.</td></tr>
+        <tr><td><b>Atuin</b></td><td>SQLite-backed history with context and encrypted sync.</td><td>History should be structured, searchable, and privacy-conscious.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Persistence incumbents</div>
+    <h2>Session resilience is table stakes for remote users, not the MVP differentiator.</h2>
+    <div class="grid four">
+      <div class="card"><h3>tmux</h3><p>Mature detach/reattach multiplexer. Best MVP backend, not a product to clone early.</p></div>
+      <div class="card"><h3>Zellij</h3><p>Modern Rust terminal workspace with panes, plugins, session features, and remote access.</p></div>
+      <div class="card"><h3>Mosh</h3><p>Roaming/intermittent connectivity replacement for interactive SSH, with local echo.</p></div>
+      <div class="card"><h3>Eternal Terminal</h3><p>Remote shell that automatically reconnects without interrupting the session.</p></div>
+    </div>
+    <p class="small muted">Recommendation: hide tmux behind Smartsh for v0.1; do not build a native terminal-state multiplexer until the AI interaction thesis is proven.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Feature competitive matrix</div>
+    <h2>Where Smartsh can be uniquely strong.</h2>
+    <div class="scroll">
+    <table class="matrix compact">
+      <thead><tr><th>Capability</th><th>Smartsh</th><th>Warp/Wave</th><th>Q/Kiro/Copilot</th><th>Claude/Codex/Gemini/Aider</th><th>Fish/Atuin/Carapace</th></tr></thead>
+      <tbody>
+        <tr><td>Works in existing terminal</td><td class="yes">Yes</td><td class="no">Mostly no</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>Does not replace Bash/Zsh semantics</td><td class="yes">Yes</td><td class="some">Mixed</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="some">Mixed</td></tr>
+        <tr><td>Ambient while user types</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Some</td><td class="no">No</td><td class="yes">Yes</td></tr>
+        <tr><td>LLM decides whether to intervene</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Limited</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>Whole-line natural-language rewrite</td><td class="yes">Core</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="some">Task-level</td><td class="no">No</td></tr>
+        <tr><td>Partial edit / arbitrary span rewrite</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Limited</td><td class="no">No</td><td class="no">No</td></tr>
+        <tr><td>Every generated command includes explanation</td><td class="yes">Invariant</td><td class="some">Some</td><td class="some">Some</td><td class="some">Some</td><td class="no">No</td></tr>
+        <tr><td>Destructive-command warning</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Some</td><td class="some">Permission model</td><td class="no">No</td></tr>
+        <tr><td>Deterministic spec grounding</td><td class="yes">Planned</td><td class="some">Some</td><td class="yes">Strong</td><td class="some">Variable</td><td class="yes">Strong</td></tr>
+        <tr><td>Contextual history database</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Some</td><td class="some">Session/repo</td><td class="yes">Strong</td></tr>
+        <tr><td>Local-only/private mode</td><td class="yes">Core</td><td class="some">Some</td><td class="some">Vendor tied</td><td class="some">Provider dependent</td><td class="yes">Yes</td></tr>
+        <tr><td>Persistent remote sessions</td><td class="some">MVP via tmux</td><td class="some">Wave strong</td><td class="no">No</td><td class="no">No</td><td class="some">Separate tools</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Market positioning</div>
+    <h2>Smartsh should position as the “AI readline layer,” not a terminal emulator or agent.</h2>
+    <div class="axis">
+      <div class="label-y">More ambient / during typing</div><div class="label-x">More agentic / task execution</div>
+      <div class="dot" style="left:18%;bottom:72%">fish/zsh</div>
+      <div class="dot" style="left:34%;bottom:62%">Atuin</div>
+      <div class="dot" style="left:42%;bottom:56%">Inshellisense</div>
+      <div class="dot smart" style="left:52%;bottom:78%">Smartsh</div>
+      <div class="dot" style="left:72%;bottom:63%">Warp</div>
+      <div class="dot" style="left:75%;bottom:52%">Wave</div>
+      <div class="dot" style="left:63%;bottom:40%">Q/Kiro</div>
+      <div class="dot" style="left:84%;bottom:26%">Claude/Codex/Gemini</div>
+      <div class="dot" style="left:86%;bottom:15%">Aider</div>
+      <div class="dot" style="left:43%;bottom:18%">ShellGPT</div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Innovation claim</div>
+    <h2>The innovation is not generation. It is policy + context + command editing.</h2>
+    <div class="grid three">
+      <div class="card"><h3>1. Intervention policy</h3><p>“Should I help now?” is a first-class model output. The best action is often <b class="bright">Nothing</b>.</p></div>
+      <div class="card"><h3>2. Mixed intent buffer</h3><p>Treat <code>kubectl get pods sorted by creation time</code> as partly syntax, partly intent — without a mode switch.</p></div>
+      <div class="card"><h3>3. Arbitrary text edits</h3><p>Suffix completion, partial rewrite, and whole-line rewrite use one edit abstraction.</p></div>
+      <div class="card"><h3>4. Mandatory explanation</h3><p>Executable LLM output must include what it does, and warnings when appropriate.</p></div>
+      <div class="card"><h3>5. Deterministic grounding</h3><p>Use specs, shell completion, filesystem, Git, and history before asking the model to invent syntax.</p></div>
+      <div class="card"><h3>6. Terminal-agnostic adoption</h3><p>Users can keep Terminal.app, iTerm2, WezTerm, Kitty, Alacritty, GNOME Terminal, etc.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Strategic differentiation</div>
+    <h2>Smartsh's durable moat would be behavioral quality, not model access.</h2>
+    <div class="split">
+      <div class="card"><h3>Hard to copy well</h3><ul><li>Low-noise intervention dataset.</li><li>Latency/cancellation pipeline that never slows typing.</li><li>Risk classifier tuned for real commands.</li><li>History ranking using cwd/repo/host/session/outcome.</li><li>Terminal compatibility and job-control reliability.</li></ul></div>
+      <div class="card"><h3>Easy to copy poorly</h3><ul><li>Natural language → shell command.</li><li>Chat panel in terminal.</li><li>“Explain this command.”</li><li>Autocomplete popups.</li><li>Dangerous-command confirmation prompts.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Adoption strategy</div>
+    <h2>Start as a Zsh plugin to prove the UX before building the standalone PTY stack.</h2>
+    <div class="grid three">
+      <div class="card"><h3>Phase 0 wedge</h3><p>ZLE plugin + local service: current buffer, contextual history, whole-line rewrite, explanation, warning.</p></div>
+      <div class="card"><h3>Why this matters</h3><p>It validates the hardest question: do users accept proactive help enough to justify a shell frontend?</p></div>
+      <div class="card"><h3>What to defer</h3><p>Native daemon, full-screen reconnect, terminal-state reconstruction, replacing tmux, custom terminal emulator.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Target users</div>
+    <h2>The best beachhead is “competent CLI users who still search flags all day.”</h2>
+    <table class="matrix">
+      <thead><tr><th>Segment</th><th>Pain</th><th>Smartsh value</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td><b>DevOps / platform engineers</b></td><td>kubectl, docker, git, cloud CLIs, logs, SSH.</td><td>History-aware, context-aware command rewrite and warnings.</td><td>High safety expectations.</td></tr>
+        <tr><td><b>Backend developers</b></td><td>Git, tests, build tools, package managers, grep/find.</td><td>Fast syntax recall and command alternatives.</td><td>May already use agents in IDE.</td></tr>
+        <tr><td><b>Power users</b></td><td>Shell history, one-liners, file ops.</td><td>Productivity without terminal migration.</td><td>Low tolerance for sluggish or chatty tools.</td></tr>
+        <tr><td><b>Beginners</b></td><td>Syntax discovery and fear of destructive commands.</td><td>Explanations and safe staging.</td><td>Need training and guardrails.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Business and market risk</div>
+    <h2>The market is crowded because the pain is real — but standalone monetization is hard.</h2>
+    <div class="grid two">
+      <div class="card"><h3>Reasons to build</h3><ul><li>Clear daily-use workflow.</li><li>Comparable tools validate demand.</li><li>Existing terminal compatibility is a meaningful wedge.</li><li>Open-source distribution can grow trust quickly.</li><li>Enterprise privacy/local mode is under-served.</li></ul></div>
+      <div class="card"><h3>Reasons it may stay nice-to-have</h3><ul><li>Agents may absorb command generation.</li><li>Terminal emulators can add similar AI surfaces.</li><li>Users may not install a shell frontend unless benefit is immediate.</li><li>Safety mistakes destroy trust.</li><li>Power users already have muscle memory.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Go / no-go criteria</div>
+    <h2>Use metrics to kill or continue within 4–6 weeks.</h2>
+    <div class="grid four">
+      <div class="card"><h3>Acceptance</h3><p><b class="good">≥20–30%</b> of shown AI rewrites accepted in targeted commands.</p></div>
+      <div class="card"><h3>Annoyance</h3><p><b class="good">Low false positives</b>: users should not feel watched or interrupted.</p></div>
+      <div class="card"><h3>Latency</h3><p><b class="good">No typing lag</b>; AI results can be late, keystrokes cannot.</p></div>
+      <div class="card"><h3>Retention</h3><p><b class="good">Daily use</b> by CLI-heavy users after novelty fades.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Recommended MVP feature set</div>
+    <h2>Build the minimum product that only Smartsh would build.</h2>
+    <div class="grid two">
+      <div class="card"><h3>Must include</h3><ul><li>Zsh plugin captures editable buffer.</li><li>Proactive but conservative intervention.</li><li>Whole-line rewrite from natural language intent.</li><li>Explanation + warnings.</li><li>SQLite contextual history.</li><li>Git context: repo, branch, default branch, dirty state.</li><li>Deterministic completion/spec source for top CLIs.</li></ul></div>
+      <div class="card"><h3>Must not include yet</h3><ul><li>New terminal emulator.</li><li>Autonomous agent loop.</li><li>Native terminal multiplexer.</li><li>Full screen-state reconnect.</li><li>Shell language replacement.</li><li>Broad cloud-only telemetry.</li><li>Every CLI in the world.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Competitive feature table</div>
+    <h2>Product-by-product summary.</h2>
+    <div class="scroll">
+      <table class="matrix compact">
+        <thead><tr><th>Product</th><th>Category</th><th>AI?</th><th>Proactive?</th><th>Rewrites command?</th><th>Explains/warns?</th><th>Existing terminal?</th><th>Primary gap</th></tr></thead>
+        <tbody>
+          <tr><td>Smartsh</td><td>Shell frontend</td><td class="yes">Yes</td><td class="yes">Core</td><td class="yes">Span/line</td><td class="yes">Invariant</td><td class="yes">Yes</td><td>Unproven UX</td></tr>
+          <tr><td>Warp</td><td>Terminal/app</td><td class="yes">Yes</td><td class="some">Some</td><td class="yes">Yes</td><td class="some">Some</td><td class="no">No</td><td>Terminal migration</td></tr>
+          <tr><td>Wave</td><td>Terminal/workspace</td><td class="yes">Yes</td><td class="some">Some</td><td class="some">Some</td><td class="some">Some</td><td class="no">No</td><td>Broad replacement</td></tr>
+          <tr><td>iTerm2 AI</td><td>Terminal feature</td><td class="yes">Yes</td><td class="no">Mostly no</td><td class="yes">Yes</td><td class="some">Some</td><td class="no">iTerm only</td><td>Explicit AI panel</td></tr>
+          <tr><td>Amazon Q/Kiro CLI</td><td>CLI assistant</td><td class="yes">Yes</td><td class="some">Autocomplete</td><td class="yes">Yes</td><td class="some">Some</td><td class="yes">Yes</td><td>Vendor path</td></tr>
+          <tr><td>Copilot CLI</td><td>Agentic CLI</td><td class="yes">Yes</td><td class="no">No</td><td class="some">Suggests</td><td class="some">Some</td><td class="yes">Yes</td><td>Task/session agent</td></tr>
+          <tr><td>Claude/Codex/Gemini</td><td>Coding agents</td><td class="yes">Yes</td><td class="no">No</td><td class="some">Task-level</td><td class="some">Permissions</td><td class="yes">Yes</td><td>Not line editor</td></tr>
+          <tr><td>ShellGPT / llm-cmd</td><td>Prompt-to-command</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="some">Some</td><td class="yes">Yes</td><td>Explicit invocation</td></tr>
+          <tr><td>Atuin</td><td>History</td><td class="some">Now some</td><td class="some">History</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td><td>Not semantic rewriting</td></tr>
+          <tr><td>Carapace/Inshellisense</td><td>Completion</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td><td>No intent engine</td></tr>
+          <tr><td>fish/zsh autosuggest</td><td>Shell UX</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="yes">Shell</td><td>History prefix only</td></tr>
+          <tr><td>tmux/Zellij/Mosh/ET</td><td>Persistence</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td><td>No command intelligence</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Risks that can kill Smartsh</div>
+    <h2>The product dies from annoyance before it dies from competition.</h2>
+    <div class="grid three">
+      <div class="card"><h3>Noisy AI</h3><p>False positives train users to ignore or uninstall. Silence must be a product feature.</p></div>
+      <div class="card"><h3>Latency</h3><p>The shell is sacred. One perceptible typing lag ruins trust.</p></div>
+      <div class="card"><h3>Safety</h3><p>A single bad destructive suggestion can end adoption in security-conscious teams.</p></div>
+      <div class="card"><h3>Compatibility</h3><p>PTY, job control, prompts, Vim, less, SSH, Ctrl-C, Ctrl-Z — all need to feel boringly normal.</p></div>
+      <div class="card"><h3>Scope creep</h3><p>Terminal emulator + multiplexer + agent + shell language is too much.</p></div>
+      <div class="card"><h3>Agent absorption</h3><p>Coding agents may make some command generation less important, so Smartsh must be the layer between all tools.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Defensible roadmap</div>
+    <h2>Build toward a platform, but validate with one killer loop.</h2>
+    <div class="grid four">
+      <div class="card"><h3>0</h3><p>Zsh plugin: rewrite + explain + warn.</p></div>
+      <div class="card"><h3>1</h3><p>Standalone Rust editor with passthrough PTY.</p></div>
+      <div class="card"><h3>2</h3><p>Command knowledge: specs, Carapace, help ingestion, risk rules.</p></div>
+      <div class="card"><h3>3</h3><p>tmux-backed persistence, then native daemon only if traction exists.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Final recommendation</div>
+    <h2>Develop it as an experiment with a strict kill switch.</h2>
+    <div class="quote">Smartsh is worth building if the thesis is: “make the normal shell feel like it has excellent instincts.” It is not worth building if the thesis becomes: “another place to chat with an AI agent.”</div>
+    <div class="grid two" style="margin-top:30px">
+      <div class="card"><h3>Go</h3><p>Proceed with a 4–6 week Zsh MVP and measure accepted rewrites, false interventions, and daily retention.</p></div>
+      <div class="card"><h3>Do not go</h3><p>Do not invest in a full PTY daemon, terminal-state reconstruction, or a polished standalone product before proving ambient intervention value.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Source notes</div>
+    <h2>Selected sources checked for the landscape.</h2>
+    <div class="scroll cols">
+      <ul class="sources">
+        <li>Smartsh project plan and technical specification, draft v0.1, 2026-09-07.</li>
+        <li>Warp: official product pages and docs for AI command suggestions and terminal/agent positioning.</li>
+        <li>Wave Terminal: official site and GitHub repository for AI-integrated terminal, model support, and durable SSH sessions.</li>
+        <li>iTerm2: AI Chat documentation for explicit AI chat/window interaction.</li>
+        <li>Amazon Q Developer / Kiro CLI: AWS documentation and blog posts for command-line autocomplete and natural-language translation.</li>
+        <li>GitHub Copilot CLI: GitHub documentation for CLI, slash commands, hooks, permissions, shell suggestions.</li>
+        <li>OpenAI Codex CLI: OpenAI docs and GitHub repository.</li>
+        <li>Anthropic Claude Code: official product and CLI documentation.</li>
+        <li>Google Gemini CLI: Google Cloud docs, Google blog, GitHub repository.</li>
+        <li>Aider: official documentation/site.</li>
+        <li>Atuin: official site/docs/GitHub.</li>
+        <li>fish shell, zsh-autosuggestions, Inshellisense, Carapace, Fig autocomplete specs.</li>
+        <li>tmux, Zellij, Mosh, Eternal Terminal official documentation/sites.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<div class="progress" id="progress"></div>
+<div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let idx=0;
+function show(i){idx=Math.max(0,Math.min(slides.length-1,i));slides.forEach((s,n)=>{s.classList.toggle('active',n===idx); const f=s.querySelector('.footer'); if(f){f.lastElementChild.textContent=(idx+1)+' / '+slides.length;}});document.getElementById('progress').style.width=((idx+1)/slides.length*100)+'%';}
+document.getElementById('prev').onclick=()=>show(idx-1);
+document.getElementById('next').onclick=()=>show(idx+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(idx+1)} if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(idx-1)} if(e.key==='Home')show(0); if(e.key==='End')show(slides.length-1);});
+show(0);
+</script>
+</body>
+</html>

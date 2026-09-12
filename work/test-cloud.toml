@@ -1,0 +1,18 @@
+[local]
+endpoint = "http://127.0.0.1:8080/v1/chat/completions"
+model = "ibm-granite/granite-4.2-3b-GGUF:Q4_K_M"
+timeout_seconds = 45
+
+[cloud]
+enabled = true
+provider = "open_ai_compatible"
+endpoint = "https://api.openai.com/v1/chat/completions"
+model = "gpt-5-mini"
+api_key_env = "OPENAI_API_KEY"
+timeout_seconds = 120
+
+[behavior]
+max_steps = 6
+output_limit_bytes = 16384
+command_timeout_seconds = 30
+auto_execute_read_only = true
