@@ -242,13 +242,14 @@ fn suggestion_context(input: &str, result: Option<&CommandResult>) -> String {
     let cwd = env::current_dir()
         .map(|path| path.display().to_string())
         .unwrap_or_else(|_| "unknown".into());
+    let platform = std::env::consts::OS;
     match result {
         Some(result) => format!(
-            "Trigger: command usage error\nWorking directory: {cwd}\nEntered command: {input}\nExit code: {:?}\nStdout:\n{}\nStderr:\n{}",
+            "Trigger: command usage error\nPlatform: {platform}\nWorking directory: {cwd}\nEntered command: {input}\nExit code: {:?}\nStdout:\n{}\nStderr:\n{}",
             result.exit_code, result.stdout, result.stderr
         ),
         None => format!(
-            "Trigger: explicit shmart assistance request\nWorking directory: {cwd}\nUser intent: {input}"
+            "Trigger: explicit shmart assistance request\nPlatform: {platform}\nWorking directory: {cwd}\nUser intent: {input}"
         ),
     }
 }
@@ -263,6 +264,15 @@ fn render_menu(menu: &SuggestionMenu) {
     }
     println!("  o. Other option (describe what you want another way)");
     println!("  q. Quit without running anything");
+    println!("\nFYI — optional tools");
+    if menu.fyi.is_empty() {
+        println!("  No additional tools suggested.");
+    } else {
+        for tool in &menu.fyi {
+            println!("  {} — {}", tool.name, tool.purpose);
+            println!("     Install: {}", tool.install);
+        }
+    }
     println!("\nChoose a number, type another command, o, or q.");
 }
 
@@ -379,6 +389,7 @@ mod tests {
                 command: "ls -la".into(),
                 explanation: "List files".into(),
             }],
+            fyi: Vec::new(),
         };
         assert_eq!(
             select_menu(&menu, "1"),

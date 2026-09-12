@@ -7,12 +7,21 @@ pub struct SuggestionMenu {
     #[serde(default)]
     pub summary: String,
     pub suggestions: Vec<Suggestion>,
+    #[serde(default)]
+    pub fyi: Vec<ToolSuggestion>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Suggestion {
     pub command: String,
     pub explanation: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ToolSuggestion {
+    pub name: String,
+    pub purpose: String,
+    pub install: String,
 }
 
 pub fn schema() -> Value {
@@ -31,9 +40,22 @@ pub fn schema() -> Value {
                     "required": ["command", "explanation"],
                     "additionalProperties": false
                 }
+            },
+            "fyi": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "purpose": {"type": "string"},
+                        "install": {"type": "string"}
+                    },
+                    "required": ["name", "purpose", "install"],
+                    "additionalProperties": false
+                }
             }
         },
-        "required": ["summary", "suggestions"],
+        "required": ["summary", "suggestions", "fyi"],
         "additionalProperties": false
     })
 }
@@ -45,12 +67,22 @@ pub fn parse(text: &str) -> Result<SuggestionMenu> {
     if menu.suggestions.is_empty() || menu.suggestions.len() > 5 {
         bail!("suggestion menu must contain between one and five options");
     }
+    if menu.fyi.len() > 3 {
+        bail!("FYI tool recommendations must contain at most three options");
+    }
     if menu
         .suggestions
         .iter()
         .any(|item| item.command.trim().is_empty() || item.explanation.trim().is_empty())
     {
         bail!("suggestion menu contains an empty command or explanation");
+    }
+    if menu.fyi.iter().any(|tool| {
+        tool.name.trim().is_empty()
+            || tool.purpose.trim().is_empty()
+            || tool.install.trim().is_empty()
+    }) {
+        bail!("FYI tool recommendations contain an empty field");
     }
     Ok(menu)
 }
@@ -95,10 +127,11 @@ mod tests {
     #[test]
     fn parses_menu_from_surrounding_text() {
         let menu = parse(
-            r#"menu: {"summary":"Try this","suggestions":[{"command":"ls -la","explanation":"List files"}]}"#,
+            r#"menu: {"summary":"Try this","suggestions":[{"command":"ls -la","explanation":"List files"}],"fyi":[{"name":"ripgrep","purpose":"Fast recursive search","install":"brew install ripgrep"}]}"#,
         )
         .unwrap();
         assert_eq!(menu.suggestions[0].command, "ls -la");
+        assert_eq!(menu.fyi[0].name, "ripgrep");
     }
 
     #[test]
@@ -110,6 +143,7 @@ mod tests {
     fn schema_leaves_item_count_validation_to_local_parser() {
         let schema = schema().to_string();
         assert!(schema.contains("suggestions"));
+        assert!(schema.contains("fyi"));
         assert!(!schema.contains("minItems"));
         assert!(!schema.contains("maxItems"));
     }

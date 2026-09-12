@@ -124,7 +124,7 @@ Prefix an intent with the reserved `shmart` keyword to request assistance immedi
 smartsh> shmart find the five largest files here
 ```
 
-Smartsh presents a numbered menu of commands with short explanations. Choose an option, type a replacement command, press `o` to describe the task another way and get a fresh menu, or press `q` to dismiss it without running anything. Normal shell invocations such as `sh script.sh` and `/bin/sh script.sh` execute normally.
+Smartsh presents a numbered menu of commands with short explanations. Choose an option, type a replacement command, press `o` to describe the task another way and get a fresh menu, or press `q` to dismiss it without running anything. The menu ends with an FYI section for relevant optional tools and their install commands; these are informational and are never run automatically. Normal shell invocations such as `sh script.sh` and `/bin/sh script.sh` execute normally.
 
 Use `help` for session commands, `exit` or Ctrl-D to leave, and Ctrl-C to cancel the current input. The editor supports multiline input, history navigation, and normal line editing through Reedline.
 
