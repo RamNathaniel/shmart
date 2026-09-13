@@ -1,8 +1,16 @@
 # shmart
 
-`shmart` adds command suggestions and command-repair menus to an existing Zsh
-or Bash session. It is a native shell plugin with a small Rust companion
-process—not a shell, terminal emulator, command executor, or autonomous agent.
+Forgot the exact flags for your terminal commands?
+
+With `shmart` you get command suggestions and command-rep menus.
+
+It is a native shell plugin that asks an LLM to fix if your command did not succeed.
+
+Note:
+- Supported shells: Bash (mac+linux), Zsh (mac)
+- You need an API key for an LLM.
+- Recommended: Use a low power fast model (Gemini Flash / DeepSeek 4.1 Flash / OpenAI Luna / Anthropic Haiku)
+
 
 ## How it works
 
@@ -21,7 +29,12 @@ status plus targeted shell/Git checks to avoid prompting after ordinary
 failures. That classifier is part of each integration; Rust contains no second
 error-detection or command-execution path.
 
-## Build
+## Downloads
+
+Download precompiled packages:
+macOS Apple Silicon: [link](https://github.com/RamNathaniel/shmart/releases/latest/download/shmart-macos-arm64)
+
+## Build yourself
 
 Shmart requires Rust 1.85 or newer.
 
