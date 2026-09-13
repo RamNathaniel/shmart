@@ -1,18 +1,18 @@
-# Smartsh — Product Plan and Technical Specification
+# Shmart — Product Plan and Technical Specification
 
 **Status:** Draft v0.1  
 **Date:** 2026-09-07  
 **Target platforms:** Linux and macOS  
 **Primary implementation language:** Rust  
-**Working product name:** Smartsh
+**Working product name:** Shmart
 
 ---
 
 ## 1. Executive Summary
 
-Smartsh is an AI-native interactive shell frontend for Linux and macOS.
+Shmart is an AI-native interactive shell frontend for Linux and macOS.
 
-It is **not** a new terminal emulator and it is **not** a new shell language. Instead, Smartsh sits between an existing terminal emulator and an existing shell such as Zsh or Bash. It owns the interactive command-editing experience, contextual history, AI-assisted completion and rewriting, command explanation, and—eventually—persistent PTY sessions that survive SSH disconnects.
+It is **not** a new terminal emulator and it is **not** a new shell language. Instead, Shmart sits between an existing terminal emulator and an existing shell such as Zsh or Bash. It owns the interactive command-editing experience, contextual history, AI-assisted completion and rewriting, command explanation, and—eventually—persistent PTY sessions that survive SSH disconnects.
 
 The core product idea is that AI assistance should be **ambient and proactive**, rather than requiring the user to stop what they are doing and explicitly invoke a chatbot.
 
@@ -25,7 +25,7 @@ A user can type any mixture of:
 - previously used command fragments,
 - commands copied from somewhere else.
 
-Smartsh continuously decides whether the best action is to:
+Shmart continuously decides whether the best action is to:
 
 1. do nothing,
 2. provide a conventional completion,
@@ -42,7 +42,7 @@ The key product distinction is:
 
 Every LLM-generated executable proposal must include a human-readable explanation of what it will do. Potentially dangerous proposals must also include explicit warnings.
 
-Smartsh should preserve the strengths of the normal terminal environment:
+Shmart should preserve the strengths of the normal terminal environment:
 
 - native terminal scrollback,
 - native mouse selection,
@@ -80,14 +80,14 @@ AI returns a command
 user copies/runs it
 ```
 
-Smartsh aims for:
+Shmart aims for:
 
 ```text
 user types normally
         ↓
-Smartsh observes command-buffer + context
+Shmart observes command-buffer + context
         ↓
-Smartsh decides whether assistance would help
+Shmart decides whether assistance would help
         ↓
 nothing / completion / rewrite / menu / explanation
         ↓
@@ -102,7 +102,7 @@ The product should feel like a normal shell that has unusually good instincts.
 
 ## 3.1 Primary goals
 
-Smartsh SHALL:
+Shmart SHALL:
 
 1. Work inside existing terminal emulators on Linux and macOS.
 2. Preserve native terminal scrollback, selection, and mouse-based copying.
@@ -123,7 +123,7 @@ Smartsh SHALL:
 
 ## 3.2 Secondary goals
 
-Smartsh SHOULD:
+Shmart SHOULD:
 
 - learn user-specific patterns from local history,
 - understand repository and machine context,
@@ -138,7 +138,7 @@ Smartsh SHOULD:
 
 # 4. Non-Goals
 
-At least for initial releases, Smartsh is NOT intended to:
+At least for initial releases, Shmart is NOT intended to:
 
 1. Implement a new shell scripting language.
 2. Reimplement all Bash or Zsh parsing and semantics.
@@ -160,12 +160,12 @@ The following should be treated as architectural invariants unless deliberately 
 
 ## 5.1 Terminal owns the mouse
 
-Smartsh SHALL NOT enable terminal mouse-capture mode during ordinary use.
+Shmart SHALL NOT enable terminal mouse-capture mode during ordinary use.
 
 Therefore:
 
 ```text
-keyboard ───► Smartsh
+keyboard ───► Shmart
 mouse ──────► terminal emulator
 ```
 
@@ -196,7 +196,7 @@ Exact bindings are configurable.
 
 ## 5.2 No permanent alternate-screen UI
 
-Smartsh SHALL NOT behave like a full-screen TUI during ordinary command editing.
+Shmart SHALL NOT behave like a full-screen TUI during ordinary command editing.
 
 The normal terminal scrollback should contain command output exactly as the user expects.
 
@@ -204,7 +204,7 @@ Transient suggestion UI should be rendered near the current prompt and removed/r
 
 ## 5.3 Shell remains the authority for shell semantics
 
-Smartsh may parse enough syntax to provide editing and assistance, but actual execution semantics belong to Bash/Zsh.
+Shmart may parse enough syntax to provide editing and assistance, but actual execution semantics belong to Bash/Zsh.
 
 ## 5.4 AI commands are staged, not silently executed
 
@@ -232,7 +232,7 @@ No network or model request may block keyboard echo or basic editing.
 
 # 6. Core UX Model
 
-Smartsh should consider the command buffer a mixture of **syntax and intent**, not merely a shell program.
+Shmart should consider the command buffer a mixture of **syntax and intent**, not merely a shell program.
 
 Examples:
 
@@ -292,7 +292,7 @@ The distinction between “natural language” and “shell command” should no
 
 # 7. Interaction Types
 
-The Smartsh decision engine should output one of a small number of UI actions.
+The Shmart decision engine should output one of a small number of UI actions.
 
 ```rust
 enum UiAction {
@@ -313,7 +313,7 @@ A future version may support compound actions, but the initial interaction model
 
 The most important valid output.
 
-Smartsh should avoid becoming noisy.
+Shmart should avoid becoming noisy.
 
 Example:
 
@@ -401,7 +401,7 @@ could offer:
 
 Can explain either:
 
-- a Smartsh proposal,
+- a Shmart proposal,
 - a command typed by the user,
 - a command retrieved from history.
 
@@ -413,11 +413,11 @@ Example:
 git reset --hard origin/main
 ```
 
-Smartsh may show:
+Shmart may show:
 
 > WARNING: resets the working tree and index to `origin/main`; uncommitted changes are discarded.
 
-Warnings are advisory. Smartsh should not become an intrusive policy engine.
+Warnings are advisory. Shmart should not become an intrusive policy engine.
 
 ---
 
@@ -475,9 +475,9 @@ Second Enter executes.
 
 ## 8.4 Ambiguous case
 
-When uncertain, Smartsh should favor the user's literal command.
+When uncertain, Shmart should favor the user's literal command.
 
-A valid command must never be replaced silently because Smartsh thinks a better command exists.
+A valid command must never be replaced silently because Shmart thinks a better command exists.
 
 ---
 
@@ -493,7 +493,7 @@ A valid command must never be replaced silently because Smartsh thinks a better 
                                │ keyboard / terminal bytes
                                ▼
 ┌──────────────────────────────────────────────────────────────┐
-│ Smartsh Client                                                │
+│ Shmart Client                                                │
 │                                                              │
 │  ┌───────────────┐  ┌────────────────┐  ┌────────────────┐  │
 │  │ Line editor   │  │ Suggestion UI  │  │ Input routing  │  │
@@ -509,7 +509,7 @@ A valid command must never be replaced silently because Smartsh thinks a better 
                 │ local IPC                         │ PTY I/O
                 ▼                                   ▼
 ┌──────────────────────────────────────────────────────────────┐
-│ Smartsh Service / Daemon                                      │
+│ Shmart Service / Daemon                                      │
 │                                                              │
 │ Context      History      LLM providers     Session manager   │
 │ providers    database     local/cloud       PTY/tmux bridge   │
@@ -554,24 +554,24 @@ Reedline is a Rust line editor developed primarily for Nushell. Current releases
 Recommended approach:
 
 - prototype with Reedline,
-- extend/fork only when Smartsh requires behavior that its abstractions cannot support cleanly.
+- extend/fork only when Shmart requires behavior that its abstractions cannot support cleanly.
 
 Potential concern:
 
-Reedline's own documentation identifies slow/concurrent completion and full-duplex concurrent output as areas where further improvement is useful. Smartsh's asynchronous model architecture may therefore require upstream work, a fork, or a thinner custom editor later.
+Reedline's own documentation identifies slow/concurrent completion and full-duplex concurrent output as areas where further improvement is useful. Shmart's asynchronous model architecture may therefore require upstream work, a fork, or a thinner custom editor later.
 
 ### Crossterm
 
 Recommended for portable terminal event/input handling.
 
-Smartsh should use:
+Shmart should use:
 
 - keyboard events,
 - resize events,
 - bracketed paste,
 - raw mode when editing.
 
-Smartsh should **not enable mouse capture**.
+Shmart should **not enable mouse capture**.
 
 Bracketed paste should be supported so multi-line pasted content is treated as one logical paste and can be validated appropriately.
 
@@ -678,7 +678,7 @@ This becomes a general mechanism usable by:
 
 ## 11.2 Diff rendering
 
-For whole-line transformations, Smartsh SHOULD optionally show a compact diff.
+For whole-line transformations, Shmart SHOULD optionally show a compact diff.
 
 Example:
 
@@ -702,19 +702,19 @@ Exact visual design should be user-tested.
 
 # 12. Input Routing and Transparent Program Mode
 
-Smartsh has two major states.
+Shmart has two major states.
 
 ## 12.1 Editing state
 
-Smartsh owns keyboard input.
+Shmart owns keyboard input.
 
 ```text
-terminal → Smartsh editor
+terminal → Shmart editor
 ```
 
 ## 12.2 Passthrough state
 
-Once a command starts a foreground program, Smartsh becomes transparent.
+Once a command starts a foreground program, Shmart becomes transparent.
 
 ```text
 terminal keyboard → PTY → program
@@ -733,15 +733,15 @@ This is required for:
 - TUIs,
 - interactive installers.
 
-Smartsh should not attempt to interpret keystrokes while another foreground process owns the terminal.
+Shmart should not attempt to interpret keystrokes while another foreground process owns the terminal.
 
-When the shell becomes ready for another command, Smartsh returns to editing state.
+When the shell becomes ready for another command, Shmart returns to editing state.
 
 ---
 
 # 13. Shell Integration Protocol
 
-Smartsh needs to know:
+Shmart needs to know:
 
 - when a prompt begins,
 - when a command begins,
@@ -755,9 +755,9 @@ This should be implemented through small Bash and Zsh integration scripts.
 Conceptually:
 
 ```text
-SMARTSH_PROMPT_START
-SMARTSH_COMMAND_START
-SMARTSH_COMMAND_END
+SHMART_PROMPT_START
+SHMART_COMMAND_START
+SHMART_COMMAND_END
 ```
 
 The actual transport should use non-printing control sequences or a dedicated file descriptor / IPC mechanism.
@@ -765,7 +765,7 @@ The actual transport should use non-printing control sequences or a dedicated fi
 Recommended priorities:
 
 1. Prefer existing semantic prompt protocols where suitable.
-2. Add a private Smartsh extension for data not represented by standard markers.
+2. Add a private Shmart extension for data not represented by standard markers.
 3. Do not print visible protocol data into scrollback.
 
 Possible contextual payload:
@@ -803,7 +803,7 @@ The integration must be robust when users have complex existing prompts.
 
 # 14. Completion and Knowledge Architecture
 
-Smartsh should not ask an LLM to reinvent known CLI syntax.
+Shmart should not ask an LLM to reinvent known CLI syntax.
 
 Completion candidates should come from multiple providers.
 
@@ -871,7 +871,7 @@ History is a first-class contextual database, not merely a text file.
 
 Atuin provides a useful reference model: its current documentation describes SQLite history with context such as directory, command duration, success/failure, machine, and session.
 
-Smartsh should store at least:
+Shmart should store at least:
 
 ```text
 id
@@ -1045,7 +1045,7 @@ These functions can initially be served by one model, but the architecture shoul
 
 The model boundary is deliberately capability-free:
 
-1. Smartsh MUST NOT provide function tools, shell tools, filesystem tools, or network tools to any model.
+1. Shmart MUST NOT provide function tools, shell tools, filesystem tools, or network tools to any model.
 2. The model receives ordinary prompt messages containing the command line, relevant error output and limited terminal context, plus the expected JSON shape.
 3. The model returns inert JSON containing command options, explanations and optional recommendations.
 4. Rust parses and validates that JSON, renders the menu, applies policy and runs only the command selected or approved by the user.
@@ -1144,7 +1144,7 @@ User-facing semantics.
 
 ### `why_suggested`
 
-Why Smartsh chose this proposal.
+Why Shmart chose this proposal.
 
 Example:
 
@@ -1291,7 +1291,7 @@ The exact provider set is out of scope for the core architecture.
 
 # 23. Privacy Modes
 
-Smartsh should explicitly support:
+Shmart should explicitly support:
 
 ## 23.1 Local-only
 
@@ -1317,7 +1317,7 @@ send_environment = false
 
 ## 23.3 No-AI mode
 
-Smartsh remains a contextual history/completion frontend.
+Shmart remains a contextual history/completion frontend.
 
 This is important for reliability and enterprise environments.
 
@@ -1325,7 +1325,7 @@ This is important for reliability and enterprise environments.
 
 # 24. Secret Redaction
 
-Before cloud inference, Smartsh should inspect content for likely secrets.
+Before cloud inference, Shmart should inspect content for likely secrets.
 
 Examples:
 
@@ -1359,7 +1359,7 @@ Cloud providers should never receive raw process environments.
 
 # 25. Safety and Command Risk
 
-Smartsh should classify command risk independently from basic LLM generation where possible.
+Shmart should classify command risk independently from basic LLM generation where possible.
 
 Useful risk classes:
 
@@ -1392,7 +1392,7 @@ A user who explicitly typed a command still owns the decision.
 
 # 26. Natural Language Detection
 
-Smartsh must avoid a brittle binary parser that declares a line either “English” or “shell”.
+Shmart must avoid a brittle binary parser that declares a line either “English” or “shell”.
 
 Inputs can be mixed.
 
@@ -1420,7 +1420,7 @@ These values guide UX; they should not be treated as mathematical truth.
 
 # 27. Deterministic Parser Strategy
 
-Smartsh should parse enough shell syntax to understand:
+Shmart should parse enough shell syntax to understand:
 
 - command boundaries,
 - arguments,
@@ -1460,7 +1460,7 @@ Use tmux behind the scenes.
 Conceptually:
 
 ```text
-Smartsh client
+Shmart client
       │
       ▼
 hidden tmux session
@@ -1471,16 +1471,16 @@ shell
 
 tmux explicitly supports detaching and later reattaching sessions while leaving programs running, including surviving remote connection drops.
 
-Users should not need to learn tmux commands for normal Smartsh operation.
+Users should not need to learn tmux commands for normal Shmart operation.
 
 ## 28.2 Final persistence architecture
 
 ```text
-smartsh client
+shmart client
       │
       │ local Unix socket / remote terminal connection
       ▼
-smartshd
+shmartd
       │
       ├── session A ─ PTY ─ zsh
       ├── session B ─ PTY ─ bash
@@ -1490,7 +1490,7 @@ smartshd
 If the client disappears:
 
 ```text
-smartshd ─ PTY ─ shell ─ foreground process
+shmartd ─ PTY ─ shell ─ foreground process
 ```
 
 remains alive.
@@ -1518,11 +1518,11 @@ tmux provides complete persistence.
 
 ## Stage B
 
-Smartsh owns PTY lifetime and reconnects primarily at shell prompts.
+Shmart owns PTY lifetime and reconnects primarily at shell prompts.
 
 ## Stage C
 
-Smartsh maintains a terminal state model and can redraw running applications after reconnect.
+Shmart maintains a terminal state model and can redraw running applications after reconnect.
 
 Stage C is effectively a subset of terminal multiplexer functionality.
 
@@ -1534,7 +1534,7 @@ It is **not** a requirement for the AI MVP.
 
 The terminal emulator should remain the primary scrollback owner in ordinary operation.
 
-Smartsh must avoid consuming output into a private screen that the outer terminal cannot see.
+Shmart must avoid consuming output into a private screen that the outer terminal cannot see.
 
 For later reconnect support, the daemon may additionally maintain:
 
@@ -1546,7 +1546,7 @@ These are separate from the terminal emulator's own scrollback.
 
 ---
 
-# 31. Smartsh Daemon
+# 31. Shmart Daemon
 
 Long-term daemon responsibilities:
 
@@ -1622,7 +1622,7 @@ Binary framing (e.g. MessagePack/CBOR/Protobuf) may eventually be useful, but JS
 Recommended user config:
 
 ```text
-~/.config/smartsh/config.toml
+~/.config/shmart/config.toml
 ```
 
 Example:
@@ -1659,21 +1659,21 @@ macOS may additionally support native application-support paths, but consistent 
 # 34. Suggested Repository Layout
 
 ```text
-smartsh/
+shmart/
 ├── Cargo.toml
 ├── crates/
-│   ├── smartsh-cli/
-│   ├── smartsh-editor/
-│   ├── smartsh-ui/
-│   ├── smartsh-core/
-│   ├── smartsh-protocol/
-│   ├── smartsh-history/
-│   ├── smartsh-context/
-│   ├── smartsh-completion/
-│   ├── smartsh-ai/
-│   ├── smartsh-pty/
-│   ├── smartsh-daemon/
-│   └── smartsh-shell-integration/
+│   ├── shmart-cli/
+│   ├── shmart-editor/
+│   ├── shmart-ui/
+│   ├── shmart-core/
+│   ├── shmart-protocol/
+│   ├── shmart-history/
+│   ├── shmart-context/
+│   ├── shmart-completion/
+│   ├── shmart-ai/
+│   ├── shmart-pty/
+│   ├── shmart-daemon/
+│   └── shmart-shell-integration/
 ├── integrations/
 │   ├── zsh/
 │   └── bash/
@@ -1696,12 +1696,12 @@ A Cargo workspace is recommended.
 
 # 35. Observability and Debugging
 
-AI-driven interactive behavior can be frustrating to debug unless Smartsh can explain itself.
+AI-driven interactive behavior can be frustrating to debug unless Shmart can explain itself.
 
 Provide a debug command such as:
 
 ```bash
-smartsh debug last
+shmart debug last
 ```
 
 Potential output:
@@ -1758,7 +1758,7 @@ The primary requirement:
 Target:
 
 ```text
-smartsh interactive startup < 100 ms
+shmart interactive startup < 100 ms
 ```
 
 before optional model initialization.
@@ -1769,7 +1769,7 @@ Large local models should be maintained by a persistent service rather than load
 
 # 37. Model Quality Evaluation
 
-A model that writes impressive commands but interrupts at the wrong time is a bad Smartsh model.
+A model that writes impressive commands but interrupts at the wrong time is a bad Shmart model.
 
 Evaluation requires several dimensions.
 
@@ -2000,7 +2000,7 @@ Consider at least:
 
 ## 40.1 Prompt injection from local files
 
-If Smartsh reads repository content for context, malicious text could attempt to manipulate the LLM.
+If Shmart reads repository content for context, malicious text could attempt to manipulate the LLM.
 
 Mitigation:
 
@@ -2049,7 +2049,7 @@ Mitigation options:
 
 # 41. Failure Modes
 
-Smartsh must degrade gracefully.
+Shmart must degrade gracefully.
 
 ## Model unavailable
 
@@ -2097,7 +2097,7 @@ Recommended implementation:
 ```text
 Zsh plugin
     │
-    └── Smartsh local service
+    └── Shmart local service
           ├── history
           ├── LLM
           └── completion/context
@@ -2106,7 +2106,7 @@ Zsh plugin
 ### Deliverables
 
 - capture current ZLE buffer,
-- send contextual request to Smartsh service,
+- send contextual request to Shmart service,
 - inline suggestion,
 - whole-line rewrite,
 - explanation,
@@ -2138,7 +2138,7 @@ Proceed if:
 
 ---
 
-## Phase 1 — Independent Smartsh Editor
+## Phase 1 — Independent Shmart Editor
 
 **Goal:** Own the command-editing experience while retaining Zsh/Bash execution.
 
@@ -2147,7 +2147,7 @@ Architecture:
 ```text
 terminal
    │
-smartsh editor
+shmart editor
    │
 PTY
    │
@@ -2187,7 +2187,7 @@ Prototype on Reedline and decide based on measured limitations whether to:
 
 ## Phase 2 — Contextual Intelligence
 
-**Goal:** Make Smartsh materially smarter than generic command generation.
+**Goal:** Make Shmart materially smarter than generic command generation.
 
 ### Deliverables
 
@@ -2204,7 +2204,7 @@ Prototype on Reedline and decide based on measured limitations whether to:
 
 ### Exit criteria
 
-For supported CLI families, Smartsh should outperform a context-free prompt-to-command model on:
+For supported CLI families, Shmart should outperform a context-free prompt-to-command model on:
 
 - correctness,
 - relevant flag selection,
@@ -2219,7 +2219,7 @@ For supported CLI families, Smartsh should outperform a context-free prompt-to-c
 
 ### Deliverables
 
-- hidden named Smartsh tmux sessions,
+- hidden named Shmart tmux sessions,
 - auto-create/attach,
 - session enumeration,
 - transparent reconnect,
@@ -2232,13 +2232,13 @@ A user should be able to:
 
 ```text
 ssh server
-smartsh
+shmart
 ```
 
 lose connectivity, reconnect, run:
 
 ```text
-smartsh
+shmart
 ```
 
 and return to the previous session.
@@ -2253,7 +2253,7 @@ Users should not need to know or care that tmux is providing persistence.
 
 ### Deliverables
 
-- persistent Smartsh PTY daemon,
+- persistent Shmart PTY daemon,
 - session detach/attach,
 - Unix-socket IPC,
 - multiple sessions,
@@ -2280,7 +2280,7 @@ Normal shell sessions survive client death and SSH disconnect without tmux.
 - alternate-screen support,
 - scroll-region handling.
 
-This is the phase in which Smartsh intentionally implements selected terminal-multiplexer behavior.
+This is the phase in which Shmart intentionally implements selected terminal-multiplexer behavior.
 
 It should not be pulled into the MVP.
 
@@ -2334,7 +2334,7 @@ Assumes a small, highly capable engineering team.
 - terminal resize,
 - no mouse capture.
 
-**Output:** first standalone Smartsh editor.
+**Output:** first standalone Shmart editor.
 
 ## Weeks 10–11: PTY + Shell Integration
 
@@ -2344,7 +2344,7 @@ Assumes a small, highly capable engineering team.
 - Ctrl-C/job-control tests,
 - Vim/less/top compatibility.
 
-**Output:** Smartsh usable as a daily shell frontend.
+**Output:** Shmart usable as a daily shell frontend.
 
 ## Week 12: Persistence + Packaging
 
@@ -2475,7 +2475,7 @@ Recommended product metrics:
 
 ## Reliability
 
-- shell crashes caused by Smartsh,
+- shell crashes caused by Shmart,
 - passthrough failures,
 - reconnect success rate,
 - corrupted history incidents.
@@ -2532,10 +2532,10 @@ These should be resolved experimentally rather than by architecture debate alone
 8. Default cloud/local mode.
 9. How often explanations should be visible automatically.
 10. How much warning UX is useful without becoming intrusive.
-11. Whether Smartsh should maintain its own scrollback metadata before native persistence.
+11. Whether Shmart should maintain its own scrollback metadata before native persistence.
 12. How to support nested SSH sessions elegantly.
 13. Whether one daemon manages all local sessions or each login owns one daemon.
-14. How remote Smartsh installations discover/reuse persistent sessions.
+14. How remote Shmart installations discover/reuse persistent sessions.
 15. Whether semantic terminal markers should use OSC 133/633 compatibility plus private extensions.
 
 ---
@@ -2549,14 +2549,14 @@ Language:            Rust
 Initial shell:       Zsh
 Second shell:        Bash
 Terminal emulator:   existing user's terminal
-Mouse capture:       NEVER in normal Smartsh mode
+Mouse capture:       NEVER in normal Shmart mode
 History:             SQLite
 Editor prototype:    ZLE first, then Reedline-based standalone spike
 Async runtime:       Tokio
 Terminal input:      Crossterm
 PTY:                 portable-pty
 Persistence MVP:     hidden tmux session
-Final persistence:   Smartsh daemon
+Final persistence:   Shmart daemon
 AI contract:         structured Proposal object
 Execution policy:    visible staging before LLM-generated execution
 Model support:       provider abstraction
@@ -2569,7 +2569,7 @@ Privacy:             local-first capable
 
 The smallest MVP that tests the differentiated product is:
 
-> **A Zsh-integrated Smartsh assistant that watches the current editable buffer and recent contextual history, proactively decides when assistance is useful, can replace the entire buffer from natural-language intent, and always explains generated commands before they are executed.**
+> **A Zsh-integrated Shmart assistant that watches the current editable buffer and recent contextual history, proactively decides when assistance is useful, can replace the entire buffer from natural-language intent, and always explains generated commands before they are executed.**
 
 The MVP DOES need:
 
@@ -2606,14 +2606,14 @@ The eventual product can become:
                             │
                             ▼
 ┌───────────────────────────────────────────────────────────────┐
-│ Smartsh interactive client                                    │
+│ Shmart interactive client                                    │
 │                                                               │
 │ editor ─ suggestions ─ explanations ─ warnings ─ history UI   │
 └───────────────────────────┬───────────────────────────────────┘
                             │
                             ▼
 ┌───────────────────────────────────────────────────────────────┐
-│ Smartsh daemon                                                │
+│ Shmart daemon                                                │
 │                                                               │
 │ PTY sessions                                                  │
 │ contextual history                                            │
@@ -2640,13 +2640,13 @@ This architecture preserves compatibility while making the interactive shell exp
 
 # 52. Core Architectural Principle
 
-Smartsh should own **intent and interaction**, not Unix semantics.
+Shmart should own **intent and interaction**, not Unix semantics.
 
 The terminal should continue to own terminal presentation.
 
 Bash/Zsh should continue to own shell execution.
 
-Smartsh should own the space between them:
+Shmart should own the space between them:
 
 ```text
 "What is the user trying to do?"
@@ -2671,4 +2671,4 @@ The implementation recommendations above were checked against current project do
 - Atuin documentation: https://docs.atuin.sh/
 - Carapace bridge documentation: https://carapace-sh.github.io/carapace-bin/spec/bridge.html
 
-These dependencies are implementation candidates, not part of the Smartsh product contract. Re-evaluate versions and API suitability when implementation begins.
+These dependencies are implementation candidates, not part of the Shmart product contract. Re-evaluate versions and API suitability when implementation begins.

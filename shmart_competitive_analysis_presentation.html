@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Smartsh Competitive Analysis & Market Landscape</title>
+<title>Shmart Competitive Analysis & Market Landscape</title>
 <style>
 :root{
   --bg:#08111f; --fg:#eff6ff; --muted:#a8b7ca; --line:#26364d;
@@ -34,9 +34,9 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 <body>
 <div class="deck" id="deck">
   <section class="slide active">
-    <div class="kicker">Smartsh / Competitive Analysis</div>
+    <div class="kicker">Shmart / Competitive Analysis</div>
     <h1>AI-native shell assistance: crowded market, real opening.</h1>
-    <p class="lead">Competitive landscape, feature matrix, differentiation, and go/no-go recommendation for Smartsh.</p>
+    <p class="lead">Competitive landscape, feature matrix, differentiation, and go/no-go recommendation for Shmart.</p>
     <div class="pillrow"><span class="tag">Linux + macOS</span><span class="tag purple">Rust shell frontend</span><span class="tag">Ambient LLM policy</span><span class="tag purple">Terminal-agnostic</span></div>
     <p class="title-meta">Prepared September 2026</p>
     <div class="footer"><span>Use ←/→ or buttons to navigate</span><span>1 / 25</span></div>
@@ -44,7 +44,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 
   <section class="slide">
     <div class="kicker">Executive verdict</div>
-    <h2>Worth developing — but only if Smartsh avoids becoming “yet another AI command generator.”</h2>
+    <h2>Worth developing — but only if Shmart avoids becoming “yet another AI command generator.”</h2>
     <div class="grid three">
       <div class="card"><div class="big-number">Yes</div><h3>Strong unmet need</h3><p>Developers still lose flow remembering flags, rediscovering syntax, and searching history. Current tools help, but most require explicit invocation or force a terminal/app migration.</p></div>
       <div class="card"><div class="big-number">Narrow</div><h3>The winning wedge</h3><p>Ambient, proactive command-buffer intelligence that can complete, rewrite, explain, warn, or stay silent inside the user's current terminal.</p></div>
@@ -54,7 +54,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 
   <section class="slide">
     <div class="kicker">Product thesis from the spec</div>
-    <h2>Smartsh owns intent and interaction, not Unix semantics.</h2>
+    <h2>Shmart owns intent and interaction, not Unix semantics.</h2>
     <div class="split">
       <div>
         <p class="lead">The core idea is not “ask AI for a command.” It is a shell editing layer that observes what the user is already typing and decides the least intrusive useful action.</p>
@@ -66,7 +66,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
         </ul>
       </div>
       <div class="diagram">
-        <div class="flow"><span class="node">user types</span><span class="arrow">→</span><span class="node">Smartsh policy</span><span class="arrow">→</span><span class="node">nothing / completion / rewrite / explain / warn</span><span class="arrow">→</span><span class="node">real shell runs it</span></div>
+        <div class="flow"><span class="node">user types</span><span class="arrow">→</span><span class="node">Shmart policy</span><span class="arrow">→</span><span class="node">nothing / completion / rewrite / explain / warn</span><span class="arrow">→</span><span class="node">real shell runs it</span></div>
       </div>
     </div>
   </section>
@@ -89,7 +89,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <h2>Warp is the strongest adjacent threat.</h2>
     <div class="grid two">
       <div class="card"><h3>Warp approach</h3><ul><li>Modern terminal emulator, not just shell plugin.</li><li>AI-assisted development environment with terminal, agent CLI, command suggestions, workflows, and agentic coding.</li><li>Can provide rich UI because it owns the terminal app.</li></ul></div>
-      <div class="card"><h3>Smartsh difference</h3><ul><li>No terminal migration required.</li><li>Preserves native terminal scrollback and mouse selection by design.</li><li>Focuses on command-editing policy: when to intervene, when not to.</li><li>Designed around local/private modes and shell compatibility.</li></ul></div>
+      <div class="card"><h3>Shmart difference</h3><ul><li>No terminal migration required.</li><li>Preserves native terminal scrollback and mouse selection by design.</li><li>Focuses on command-editing policy: when to intervene, when not to.</li><li>Designed around local/private modes and shell compatibility.</li></ul></div>
     </div>
     <p class="small muted">Sources: Warp describes itself as an open platform/terminal for AI-assisted software development and documents natural-language command suggestions using <code>#</code>.</p>
   </section>
@@ -98,10 +98,10 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <div class="kicker">AI terminal emulators</div>
     <h2>Terminal apps can move faster on UI, but they create adoption friction.</h2>
     <table class="matrix">
-      <thead><tr><th>Product</th><th>Approach</th><th>Strength</th><th>Weakness vs Smartsh</th></tr></thead>
+      <thead><tr><th>Product</th><th>Approach</th><th>Strength</th><th>Weakness vs Shmart</th></tr></thead>
       <tbody>
         <tr><td><b>Warp</b></td><td>AI-native terminal/app + agents.</td><td>Polished rich terminal UI, command blocks, workflows, agent features.</td><td>Requires adopting Warp; less “use any terminal.”</td></tr>
-        <tr><td><b>Wave</b></td><td>Open-source AI-integrated terminal with previews, editor, workspace features.</td><td>Works with multiple AI providers; includes durable SSH sessions.</td><td>Broad terminal/workspace replacement; Smartsh is narrower and terminal-agnostic.</td></tr>
+        <tr><td><b>Wave</b></td><td>Open-source AI-integrated terminal with previews, editor, workspace features.</td><td>Works with multiple AI providers; includes durable SSH sessions.</td><td>Broad terminal/workspace replacement; Shmart is narrower and terminal-agnostic.</td></tr>
         <tr><td><b>iTerm2 AI</b></td><td>AI chat/prompt integrated into iTerm2.</td><td>Massive macOS terminal user base.</td><td>Explicit AI surfaces; macOS/iTerm-specific.</td></tr>
         <tr><td><b>Termius / TermAI</b></td><td>AI inside SSH client, especially mobile/infra workflows.</td><td>Strong SSH/mobile use case; can ground on session output.</td><td>Not a general local shell frontend for existing terminal emulators.</td></tr>
       </tbody>
@@ -113,9 +113,9 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <h2>These validate demand, but most still break typing flow.</h2>
     <div class="scroll">
     <table class="matrix">
-      <thead><tr><th>Product</th><th>Approach</th><th>What they solved</th><th>Gap Smartsh targets</th></tr></thead>
+      <thead><tr><th>Product</th><th>Approach</th><th>What they solved</th><th>Gap Shmart targets</th></tr></thead>
       <tbody>
-        <tr><td><b>Amazon Q / Kiro CLI</b></td><td>Shell autocomplete + natural-language command translation.</td><td>Contextual CLI completions and AI in terminal.</td><td>Vendor/product direction changed; Smartsh can be model/vendor neutral and locally runnable.</td></tr>
+        <tr><td><b>Amazon Q / Kiro CLI</b></td><td>Shell autocomplete + natural-language command translation.</td><td>Contextual CLI completions and AI in terminal.</td><td>Vendor/product direction changed; Shmart can be model/vendor neutral and locally runnable.</td></tr>
         <tr><td><b>GitHub Copilot CLI</b></td><td>Agentic CLI with commands, slash commands, hooks, permissions.</td><td>Strong GitHub/dev workflow integration.</td><td>Not built primarily as an ambient editor that watches every shell buffer.</td></tr>
         <tr><td><b>ShellGPT</b></td><td><code>sgpt</code> command for shell commands, code snippets, docs.</td><td>Simple, portable, popular open-source utility.</td><td>Explicit invocation; limited deterministic completion/menu integration.</td></tr>
         <tr><td><b>llm-cmd</b></td><td>LLM plugin that pre-populates a generated shell command.</td><td>Unix-philosophy composability; editable before execution.</td><td>Prompt-to-command, not proactive command-buffer policy.</td></tr>
@@ -130,15 +130,15 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <h2>Agents are powerful, but they are solving a different problem.</h2>
     <div class="grid two">
       <div class="card"><h3>Claude Code / Codex CLI / Gemini CLI / Aider</h3><p>These tools run inside the terminal and operate on a project: read code, edit files, run tests, use tools, and coordinate multi-step tasks.</p><p>They are becoming the developer's “AI worker.”</p></div>
-      <div class="card"><h3>Smartsh position</h3><p>Smartsh is not a coding agent. It is closer to an AI-native readline/ZLE layer: fast, ambient, command-oriented, and compatible with every tool, including those agents.</p><p>Smartsh can actually become the front door for running these agents.</p></div>
+      <div class="card"><h3>Shmart position</h3><p>Shmart is not a coding agent. It is closer to an AI-native readline/ZLE layer: fast, ambient, command-oriented, and compatible with every tool, including those agents.</p><p>Shmart can actually become the front door for running these agents.</p></div>
     </div>
   </section>
 
   <section class="slide">
     <div class="kicker">Autocomplete and history incumbents</div>
-    <h2>The deterministic layer is mature — Smartsh should reuse it, not replace it.</h2>
+    <h2>The deterministic layer is mature — Shmart should reuse it, not replace it.</h2>
     <table class="matrix compact">
-      <thead><tr><th>Product</th><th>Core value</th><th>Best lesson for Smartsh</th></tr></thead>
+      <thead><tr><th>Product</th><th>Core value</th><th>Best lesson for Shmart</th></tr></thead>
       <tbody>
         <tr><td><b>Fig specs / Amazon Q autocomplete</b></td><td>Declarative command specs for subcommands, options, args.</td><td>Use structured specs to prevent hallucinated flags.</td></tr>
         <tr><td><b>Inshellisense</b></td><td>IDE-style autocomplete for 600+ CLIs across shells/OSes.</td><td>Completion UI can be valuable without AI.</td></tr>
@@ -159,15 +159,15 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
       <div class="card"><h3>Mosh</h3><p>Roaming/intermittent connectivity replacement for interactive SSH, with local echo.</p></div>
       <div class="card"><h3>Eternal Terminal</h3><p>Remote shell that automatically reconnects without interrupting the session.</p></div>
     </div>
-    <p class="small muted">Recommendation: hide tmux behind Smartsh for v0.1; do not build a native terminal-state multiplexer until the AI interaction thesis is proven.</p>
+    <p class="small muted">Recommendation: hide tmux behind Shmart for v0.1; do not build a native terminal-state multiplexer until the AI interaction thesis is proven.</p>
   </section>
 
   <section class="slide">
     <div class="kicker">Feature competitive matrix</div>
-    <h2>Where Smartsh can be uniquely strong.</h2>
+    <h2>Where Shmart can be uniquely strong.</h2>
     <div class="scroll">
     <table class="matrix compact">
-      <thead><tr><th>Capability</th><th>Smartsh</th><th>Warp/Wave</th><th>Q/Kiro/Copilot</th><th>Claude/Codex/Gemini/Aider</th><th>Fish/Atuin/Carapace</th></tr></thead>
+      <thead><tr><th>Capability</th><th>Shmart</th><th>Warp/Wave</th><th>Q/Kiro/Copilot</th><th>Claude/Codex/Gemini/Aider</th><th>Fish/Atuin/Carapace</th></tr></thead>
       <tbody>
         <tr><td>Works in existing terminal</td><td class="yes">Yes</td><td class="no">Mostly no</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
         <tr><td>Does not replace Bash/Zsh semantics</td><td class="yes">Yes</td><td class="some">Mixed</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="some">Mixed</td></tr>
@@ -188,13 +188,13 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 
   <section class="slide">
     <div class="kicker">Market positioning</div>
-    <h2>Smartsh should position as the “AI readline layer,” not a terminal emulator or agent.</h2>
+    <h2>Shmart should position as the “AI readline layer,” not a terminal emulator or agent.</h2>
     <div class="axis">
       <div class="label-y">More ambient / during typing</div><div class="label-x">More agentic / task execution</div>
       <div class="dot" style="left:18%;bottom:72%">fish/zsh</div>
       <div class="dot" style="left:34%;bottom:62%">Atuin</div>
       <div class="dot" style="left:42%;bottom:56%">Inshellisense</div>
-      <div class="dot smart" style="left:52%;bottom:78%">Smartsh</div>
+      <div class="dot smart" style="left:52%;bottom:78%">Shmart</div>
       <div class="dot" style="left:72%;bottom:63%">Warp</div>
       <div class="dot" style="left:75%;bottom:52%">Wave</div>
       <div class="dot" style="left:63%;bottom:40%">Q/Kiro</div>
@@ -219,7 +219,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 
   <section class="slide">
     <div class="kicker">Strategic differentiation</div>
-    <h2>Smartsh's durable moat would be behavioral quality, not model access.</h2>
+    <h2>Shmart's durable moat would be behavioral quality, not model access.</h2>
     <div class="split">
       <div class="card"><h3>Hard to copy well</h3><ul><li>Low-noise intervention dataset.</li><li>Latency/cancellation pipeline that never slows typing.</li><li>Risk classifier tuned for real commands.</li><li>History ranking using cwd/repo/host/session/outcome.</li><li>Terminal compatibility and job-control reliability.</li></ul></div>
       <div class="card"><h3>Easy to copy poorly</h3><ul><li>Natural language → shell command.</li><li>Chat panel in terminal.</li><li>“Explain this command.”</li><li>Autocomplete popups.</li><li>Dangerous-command confirmation prompts.</li></ul></div>
@@ -240,7 +240,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <div class="kicker">Target users</div>
     <h2>The best beachhead is “competent CLI users who still search flags all day.”</h2>
     <table class="matrix">
-      <thead><tr><th>Segment</th><th>Pain</th><th>Smartsh value</th><th>Risk</th></tr></thead>
+      <thead><tr><th>Segment</th><th>Pain</th><th>Shmart value</th><th>Risk</th></tr></thead>
       <tbody>
         <tr><td><b>DevOps / platform engineers</b></td><td>kubectl, docker, git, cloud CLIs, logs, SSH.</td><td>History-aware, context-aware command rewrite and warnings.</td><td>High safety expectations.</td></tr>
         <tr><td><b>Backend developers</b></td><td>Git, tests, build tools, package managers, grep/find.</td><td>Fast syntax recall and command alternatives.</td><td>May already use agents in IDE.</td></tr>
@@ -272,7 +272,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
 
   <section class="slide">
     <div class="kicker">Recommended MVP feature set</div>
-    <h2>Build the minimum product that only Smartsh would build.</h2>
+    <h2>Build the minimum product that only Shmart would build.</h2>
     <div class="grid two">
       <div class="card"><h3>Must include</h3><ul><li>Zsh plugin captures editable buffer.</li><li>Proactive but conservative intervention.</li><li>Whole-line rewrite from natural language intent.</li><li>Explanation + warnings.</li><li>SQLite contextual history.</li><li>Git context: repo, branch, default branch, dirty state.</li><li>Deterministic completion/spec source for top CLIs.</li></ul></div>
       <div class="card"><h3>Must not include yet</h3><ul><li>New terminal emulator.</li><li>Autonomous agent loop.</li><li>Native terminal multiplexer.</li><li>Full screen-state reconnect.</li><li>Shell language replacement.</li><li>Broad cloud-only telemetry.</li><li>Every CLI in the world.</li></ul></div>
@@ -286,7 +286,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
       <table class="matrix compact">
         <thead><tr><th>Product</th><th>Category</th><th>AI?</th><th>Proactive?</th><th>Rewrites command?</th><th>Explains/warns?</th><th>Existing terminal?</th><th>Primary gap</th></tr></thead>
         <tbody>
-          <tr><td>Smartsh</td><td>Shell frontend</td><td class="yes">Yes</td><td class="yes">Core</td><td class="yes">Span/line</td><td class="yes">Invariant</td><td class="yes">Yes</td><td>Unproven UX</td></tr>
+          <tr><td>Shmart</td><td>Shell frontend</td><td class="yes">Yes</td><td class="yes">Core</td><td class="yes">Span/line</td><td class="yes">Invariant</td><td class="yes">Yes</td><td>Unproven UX</td></tr>
           <tr><td>Warp</td><td>Terminal/app</td><td class="yes">Yes</td><td class="some">Some</td><td class="yes">Yes</td><td class="some">Some</td><td class="no">No</td><td>Terminal migration</td></tr>
           <tr><td>Wave</td><td>Terminal/workspace</td><td class="yes">Yes</td><td class="some">Some</td><td class="some">Some</td><td class="some">Some</td><td class="no">No</td><td>Broad replacement</td></tr>
           <tr><td>iTerm2 AI</td><td>Terminal feature</td><td class="yes">Yes</td><td class="no">Mostly no</td><td class="yes">Yes</td><td class="some">Some</td><td class="no">iTerm only</td><td>Explicit AI panel</td></tr>
@@ -304,7 +304,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
   </section>
 
   <section class="slide">
-    <div class="kicker">Risks that can kill Smartsh</div>
+    <div class="kicker">Risks that can kill Shmart</div>
     <h2>The product dies from annoyance before it dies from competition.</h2>
     <div class="grid three">
       <div class="card"><h3>Noisy AI</h3><p>False positives train users to ignore or uninstall. Silence must be a product feature.</p></div>
@@ -312,7 +312,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
       <div class="card"><h3>Safety</h3><p>A single bad destructive suggestion can end adoption in security-conscious teams.</p></div>
       <div class="card"><h3>Compatibility</h3><p>PTY, job control, prompts, Vim, less, SSH, Ctrl-C, Ctrl-Z — all need to feel boringly normal.</p></div>
       <div class="card"><h3>Scope creep</h3><p>Terminal emulator + multiplexer + agent + shell language is too much.</p></div>
-      <div class="card"><h3>Agent absorption</h3><p>Coding agents may make some command generation less important, so Smartsh must be the layer between all tools.</p></div>
+      <div class="card"><h3>Agent absorption</h3><p>Coding agents may make some command generation less important, so Shmart must be the layer between all tools.</p></div>
     </div>
   </section>
 
@@ -330,7 +330,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
   <section class="slide">
     <div class="kicker">Final recommendation</div>
     <h2>Develop it as an experiment with a strict kill switch.</h2>
-    <div class="quote">Smartsh is worth building if the thesis is: “make the normal shell feel like it has excellent instincts.” It is not worth building if the thesis becomes: “another place to chat with an AI agent.”</div>
+    <div class="quote">Shmart is worth building if the thesis is: “make the normal shell feel like it has excellent instincts.” It is not worth building if the thesis becomes: “another place to chat with an AI agent.”</div>
     <div class="grid two" style="margin-top:30px">
       <div class="card"><h3>Go</h3><p>Proceed with a 4–6 week Zsh MVP and measure accepted rewrites, false interventions, and daily retention.</p></div>
       <div class="card"><h3>Do not go</h3><p>Do not invest in a full PTY daemon, terminal-state reconstruction, or a polished standalone product before proving ambient intervention value.</p></div>
@@ -342,7 +342,7 @@ ul{margin:0;padding-left:1.2em}.lead{font-size:clamp(23px,2.2vw,37px);line-heigh
     <h2>Selected sources checked for the landscape.</h2>
     <div class="scroll cols">
       <ul class="sources">
-        <li>Smartsh project plan and technical specification, draft v0.1, 2026-09-07.</li>
+        <li>Shmart project plan and technical specification, draft v0.1, 2026-09-07.</li>
         <li>Warp: official product pages and docs for AI command suggestions and terminal/agent positioning.</li>
         <li>Wave Terminal: official site and GitHub repository for AI-integrated terminal, model support, and durable SSH sessions.</li>
         <li>iTerm2: AI Chat documentation for explicit AI chat/window interaction.</li>

@@ -63,7 +63,7 @@ pub fn schema() -> Value {
 pub fn parse(text: &str) -> Result<SuggestionMenu> {
     let object = extract_json_object(text).context("model response contained no JSON menu")?;
     let menu: SuggestionMenu = serde_json::from_str(object)
-        .with_context(|| format!("invalid smartsh suggestion menu: {object}"))?;
+        .with_context(|| format!("invalid shmart suggestion menu: {object}"))?;
     if menu.suggestions.is_empty() || menu.suggestions.len() > 5 {
         bail!("suggestion menu must contain between one and five options");
     }

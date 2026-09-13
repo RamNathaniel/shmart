@@ -93,7 +93,7 @@ fn schema_with_delegation(include_delegation: bool) -> Value {
 
 pub fn parse(text: &str) -> Result<Decision> {
     let object = extract_json_object(text).context("model response contained no JSON object")?;
-    serde_json::from_str(object).with_context(|| format!("invalid smartsh decision: {object}"))
+    serde_json::from_str(object).with_context(|| format!("invalid shmart decision: {object}"))
 }
 
 fn extract_json_object(text: &str) -> Option<&str> {

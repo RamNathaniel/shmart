@@ -132,7 +132,7 @@ pub async fn run(
     }
 
     bail!(
-        "smartsh reached its {}-step limit",
+        "shmart reached its {}-step limit",
         config.behavior.max_steps
     )
 }

@@ -19,4 +19,4 @@ fi
 export PATH="$(dirname -- "$cargo_bin"):$PATH"
 cd "$project_dir"
 "$cargo_bin" build --release
-exec "$project_dir/target/release/smartsh" "$@"
+exec "$project_dir/target/release/shmart" "$@"

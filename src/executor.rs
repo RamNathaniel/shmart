@@ -57,7 +57,7 @@ fn truncate_lossy(bytes: &[u8], limit: usize) -> String {
         return String::from_utf8_lossy(bytes).into_owned();
     }
     let mut text = String::from_utf8_lossy(&bytes[..limit]).into_owned();
-    text.push_str("\n[output truncated by smartsh]");
+    text.push_str("\n[output truncated by shmart]");
     text
 }
 

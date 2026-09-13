@@ -144,7 +144,35 @@ pub fn resolve_path(override_path: Option<&Path>) -> Result<PathBuf> {
         return Ok(path.to_path_buf());
     }
     let dirs = BaseDirs::new().context("could not determine the user configuration directory")?;
-    Ok(dirs.config_dir().join("smartsh").join("config.toml"))
+    Ok(dirs.config_dir().join("shmart").join("config.toml"))
+}
+
+pub fn migrate_legacy_config(destination: &Path) -> Result<()> {
+    if destination.exists() {
+        return Ok(());
+    }
+    let dirs = BaseDirs::new().context("could not determine the user configuration directory")?;
+    let legacy = dirs.config_dir().join("smartsh").join("config.toml");
+    if !legacy.is_file() {
+        return Ok(());
+    }
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("failed to create {}", parent.display()))?;
+    }
+    fs::copy(&legacy, destination).with_context(|| {
+        format!(
+            "failed to migrate {} to {}",
+            legacy.display(),
+            destination.display()
+        )
+    })?;
+    eprintln!(
+        "Migrated configuration from {} to {} (the original was retained).",
+        legacy.display(),
+        destination.display()
+    );
+    Ok(())
 }
 
 fn validate_http_endpoint(name: &str, endpoint: &str) -> Result<()> {

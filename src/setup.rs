@@ -108,19 +108,19 @@ pub fn run(path: &Path, options: SetupOptions) -> Result<()> {
         println!("Immediate router model: {}", config.local.model);
         println!("Immediate router endpoint: {}", config.local.endpoint);
         println!(
-            "Set {} in your environment; smartsh never stores the key itself.",
+            "Set {} in your environment; shmart never stores the key itself.",
             config.local.api_key_env
         );
     }
     if config.cloud.enabled && config.cloud.api_key_env != config.local.api_key_env {
         println!();
         println!(
-            "Set {} in your environment; smartsh never stores the key itself.",
+            "Set {} in your environment; shmart never stores the key itself.",
             config.cloud.api_key_env
         );
     }
     println!();
-    println!("Then run: smartsh doctor");
+    println!("Then run: shmart doctor");
     Ok(())
 }
 
@@ -160,7 +160,7 @@ fn provider_preset(choice: ProviderChoice) -> ProviderPreset {
         ProviderChoice::Custom => ProviderPreset {
             provider: CloudProvider::OpenAiCompatible,
             endpoint: "http://127.0.0.1:9000/v1/chat/completions",
-            api_key_env: "SMARTSH_CLOUD_API_KEY",
+            api_key_env: "SHMART_CLOUD_API_KEY",
             default_model: None,
         },
         ProviderChoice::None => unreachable!("disabled cloud has no preset"),

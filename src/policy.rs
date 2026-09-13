@@ -32,7 +32,7 @@ fn assess_program(program: &str, args: &[String]) -> Verdict {
     .contains(&name)
         || name.starts_with("mkfs")
     {
-        return Verdict::Blocked(format!("{name} is not permitted through smartsh"));
+        return Verdict::Blocked(format!("{name} is not permitted through shmart"));
     }
 
     if ["sh", "bash", "zsh", "fish", "dash"].contains(&name) {
