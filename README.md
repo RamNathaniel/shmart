@@ -137,6 +137,53 @@ command, press `o` to describe another option, or press `q`/Ctrl-C to dismiss.
 Ctrl-D closes menu input. Ctrl-Z retains normal job-control semantics and is not
 a cancellation key.
 
+## Study an unfamiliar Python CLI
+
+When a failed or explicit command directly invokes `python` or `python3` with a
+script or `-m module`, Shmart can learn the CLI's `argparse` structure before it
+asks the model for suggestions. Detection is passive. Shmart does not import,
+run, or call `--help` on the target before asking permission.
+
+For an uncached candidate, Shmart shows the resolved target, interpreter,
+working directory, and this warning:
+
+> Shmart will run the program locally in a separate probe until it calls
+> `argparse`. Code that runs before argument parsing may have side effects.
+
+The choices are **Study this CLI once**, **Not now**, and **Don't ask again for
+this CLI fingerprint**. Studying and accepting a generated command are separate
+decisions; a study never executes the original or suggested command.
+
+After approval, a disposable Python child process installs an in-process
+`argparse` interception, starts the target, captures the first parser call over
+a dedicated protocol pipe, and exits immediately. This is process isolation,
+not a sandbox: startup code before `parse_args()` can have side effects. The
+runner closes stdin, bounds output and schema sizes, removes Shmart credentials,
+uses a five-second timeout, and terminates the probe process group on timeout or
+cancellation.
+
+Validated schemas are fingerprinted by the target, interpreter, environment,
+working directory, and adapter version. Script content changes invalidate the
+entry immediately; otherwise entries expire after seven days. Cache files use
+private permissions in the platform cache directory. Sensitive defaults and
+choices are redacted before caching or model use.
+
+Manual lifecycle commands use the same consent boundary:
+
+```bash
+shmart cli study python3 tools/deploy.py --profile production
+shmart cli status python3 tools/deploy.py
+shmart cli schema python3 tools/deploy.py
+shmart cli restudy python3 tools/deploy.py
+shmart cli forget python3 tools/deploy.py
+shmart cli cache list
+shmart cli cache clear
+```
+
+The first version intentionally excludes `python -c`, stdin programs, wrappers
+such as `sudo` and `ssh`, aliases that conceal Python, and frameworks other than
+standard-library `argparse`.
+
 ## Security boundary
 
 Shmart is not a sandbox. A selected command executes with the current user's

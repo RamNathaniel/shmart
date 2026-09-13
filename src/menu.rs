@@ -8,6 +8,7 @@ use anyhow::{Context, Result};
 
 use crate::{
     api::ModelApi,
+    cli_study,
     config::Config,
     suggestion::{self, SuggestionMenu},
 };
@@ -25,11 +26,20 @@ pub async fn run(
     status: Option<i32>,
     output: &Path,
     verbose: bool,
+    argv: &[String],
 ) -> Result<()> {
     // An empty file means "dismissed" to the Zsh integration.
     fs::write(output, "").with_context(|| format!("could not initialize {}", output.display()))?;
 
     let mut context = suggestion_context(command, trigger, status);
+    match cli_study::maybe_context(argv, config, verbose)? {
+        cli_study::ContextOutcome::Continue(Some(cli_context)) => {
+            context.push_str("\n\n");
+            context.push_str(&cli_context);
+        }
+        cli_study::ContextOutcome::Continue(None) => {}
+        cli_study::ContextOutcome::Cancelled => return Ok(()),
+    }
     loop {
         if verbose {
             eprintln!(

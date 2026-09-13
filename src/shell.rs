@@ -237,6 +237,7 @@ mod tests {
     fn plugin_wraps_accept_line_and_has_no_child_shell() {
         assert!(PLUGIN_TEMPLATE.contains("zle -N accept-line _shmart_accept_line"));
         assert!(PLUGIN_TEMPLATE.contains("add-zsh-hook preexec"));
+        assert!(PLUGIN_TEMPLATE.contains("--argv"));
         assert!(!PLUGIN_TEMPLATE.contains("exec zsh -c"));
     }
 }

@@ -1,4 +1,5 @@
 mod api;
+mod cli_study;
 mod config;
 mod menu;
 mod setup;
@@ -39,6 +40,8 @@ enum Command {
     Shell(ShellArgs),
     /// Print shell integration code for dotfile managers.
     Init(InitArgs),
+    /// Study and manage Python argparse CLIs.
+    Cli(CliArgs),
     /// Internal command used by the native shell integration.
     #[command(hide = true)]
     Suggest(SuggestArgs),
@@ -101,6 +104,51 @@ struct SuggestArgs {
     status: Option<i32>,
     #[arg(long, value_name = "FILE")]
     output: PathBuf,
+    #[arg(long, action = clap::ArgAction::Append, num_args = 1, allow_hyphen_values = true)]
+    argv: Vec<String>,
+}
+
+#[derive(Debug, Args)]
+struct CliArgs {
+    #[command(subcommand)]
+    command: CliStudyCommand,
+}
+
+#[derive(Debug, Subcommand)]
+enum CliStudyCommand {
+    /// Study a Python CLI after displaying the consent warning.
+    Study(PythonInvocationArgs),
+    /// Show cache identity, freshness, source, and schema counts.
+    Status(PythonInvocationArgs),
+    /// Print the cached normalized schema for inspection.
+    Schema(PythonInvocationArgs),
+    /// Discard the current schema and ask to study the CLI again.
+    Restudy(PythonInvocationArgs),
+    /// Remove the schema and suppression decision for one CLI fingerprint.
+    Forget(PythonInvocationArgs),
+    /// Inspect or clear the Python CLI schema cache.
+    Cache(CliCacheArgs),
+}
+
+#[derive(Debug, Args)]
+struct PythonInvocationArgs {
+    /// Python invocation, for example: python3 tool.py --help
+    #[arg(required = true, trailing_var_arg = true, allow_hyphen_values = true)]
+    invocation: Vec<String>,
+}
+
+#[derive(Debug, Args)]
+struct CliCacheArgs {
+    #[command(subcommand)]
+    command: CliCacheCommand,
+}
+
+#[derive(Debug, Subcommand)]
+enum CliCacheCommand {
+    /// List cached CLI identities without schema contents or secrets.
+    List,
+    /// Delete all cached schemas and suppression decisions after confirmation.
+    Clear,
 }
 
 #[derive(Clone, Debug, ValueEnum)]
@@ -166,6 +214,23 @@ async fn main() -> Result<()> {
             ShellCommand::Uninstall(args) => shell::uninstall_zsh(args.zshrc.as_deref())?,
         },
         Some(Command::Init(_args)) => shell::print_zsh_init()?,
+        Some(Command::Cli(args)) => match args.command {
+            CliStudyCommand::Study(args) => {
+                let api_key_env = optional_api_key_env(&config_path);
+                cli_study::study(&args.invocation, &api_key_env, cli.verbose, false)?;
+            }
+            CliStudyCommand::Status(args) => cli_study::status(&args.invocation)?,
+            CliStudyCommand::Schema(args) => cli_study::show_schema(&args.invocation)?,
+            CliStudyCommand::Restudy(args) => {
+                let api_key_env = optional_api_key_env(&config_path);
+                cli_study::study(&args.invocation, &api_key_env, cli.verbose, true)?;
+            }
+            CliStudyCommand::Forget(args) => cli_study::forget(&args.invocation)?,
+            CliStudyCommand::Cache(args) => match args.command {
+                CliCacheCommand::List => cli_study::cache_list()?,
+                CliCacheCommand::Clear => cli_study::cache_clear()?,
+            },
+        },
         Some(Command::Suggest(args)) => {
             let config = load_config(&config_path)?;
             config.validate()?;
@@ -176,6 +241,7 @@ async fn main() -> Result<()> {
                 args.status,
                 &args.output,
                 cli.verbose,
+                &args.argv,
             )
             .await?;
         }
@@ -195,6 +261,12 @@ fn load_config(path: &std::path::Path) -> Result<Config> {
             path.display()
         )
     })
+}
+
+fn optional_api_key_env(path: &std::path::Path) -> String {
+    Config::load(path)
+        .map(|config| config.model.api_key_env)
+        .unwrap_or_default()
 }
 
 impl From<SetupProvider> for setup::ProviderChoice {

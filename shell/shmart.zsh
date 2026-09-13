@@ -81,6 +81,22 @@ _shmart_precmd() {
 _shmart_request() {
   local trigger=$1 command_line=$2 exit_status=${3:-}
   local choice_file
+  local -a command_words argv_options
+  command_words=(${(z)command_line}) 2>/dev/null || command_words=()
+  local word
+  for word in "${command_words[@]}"; do
+    if [[ $word == <->'>'* || $word == <->'<'* ]]; then
+      argv_options=()
+      break
+    fi
+    case $word in
+      '|'|'|&'|'||'|'&&'|';'|'&'|'('|')'|'{'|'}'|'<'|'>'|'>>'|'<<'|'<<<'|'<&'|'>&')
+        argv_options=()
+        break
+        ;;
+    esac
+    argv_options+=(--argv "${(Q)word}")
+  done
   choice_file=$(mktemp "${TMPDIR:-/tmp}/shmart-choice.XXXXXXXX") || {
     print -u2 -- 'shmart: could not create a temporary selection file'
     return 1
@@ -97,11 +113,11 @@ _shmart_request() {
   if [[ -n $exit_status ]]; then
     command "$SHMART_BIN" suggest \
       --trigger "$trigger" --command "$command_line" --status "$exit_status" \
-      --output "$choice_file" </dev/tty >/dev/tty
+      --output "$choice_file" "${argv_options[@]}" </dev/tty >/dev/tty
   else
     command "$SHMART_BIN" suggest \
       --trigger "$trigger" --command "$command_line" \
-      --output "$choice_file" </dev/tty >/dev/tty
+      --output "$choice_file" "${argv_options[@]}" </dev/tty >/dev/tty
   fi
   local result=$?
   if [[ -n $tty_state ]]; then
@@ -141,7 +157,7 @@ _shmart_is_management_command() {
     esac
   done
   case ${words[index]:-} in
-    setup|doctor|config-path|shell|init|help|-h|--help|-V|--version)
+    setup|doctor|config-path|shell|init|cli|help|-h|--help|-V|--version)
       return 0
       ;;
   esac
