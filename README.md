@@ -157,7 +157,7 @@ Generated commands are bold cyan, explanations are dim, menu keys are yellow,
 and the FYI section is blue. Set `NO_COLOR=1` for plain output. Model-provided
 terminal control characters are escaped before display.
 
-Choose a number to execute that command in the current Zsh, enter a replacement
+Choose a number to execute that command in the current shell, enter a replacement
 command, press `o` to describe another option, or press `q`/Ctrl-C to dismiss.
 Ctrl-D closes menu input. Ctrl-Z retains normal job-control semantics and is not
 a cancellation key.
