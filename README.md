@@ -1,10 +1,19 @@
-# shmart
+# shmart - the smart shell
+Ram Nathaniel, 2026
 
-Forgot the exact flags for your terminal commands?
+`shamrt` is a native shell plugin that fixes failed commands using an LLM.
 
-With `shmart` you get command suggestions and command-rep menus.
+#### Forgot the flags of that terminal command?
+With `shmart` you get command fixes suggestion menus.
 
-It is a native shell plugin that asks an LLM to fix if your command did not succeed.
+#### Using your own python CLI?
+`shmart` will learn it and suggest command line fixes.
+
+#### What about privacy?
+A few things to consider:
+- `shmart` only sends the command line (and possible flags) - not any files/data.
+- `shmart` can work with local LLMs
+- `shmart` itself does not collect any data.
 
 Note:
 - Supported shells: Bash (mac+linux), Zsh (mac)
