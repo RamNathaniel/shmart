@@ -19,18 +19,38 @@ pub enum Trigger {
     Error,
 }
 
-pub async fn run(
-    config: &Config,
-    command: &str,
-    trigger: Trigger,
-    status: Option<i32>,
-    output: &Path,
-    verbose: bool,
-    argv: &[String],
-) -> Result<()> {
+pub struct Request<'a> {
+    pub config: &'a Config,
+    pub command: &'a str,
+    pub trigger: Trigger,
+    pub status: Option<i32>,
+    pub output: &'a Path,
+    pub verbose: bool,
+    pub argv: &'a [String],
+    pub parse_command: bool,
+}
+
+pub async fn run(request: Request<'_>) -> Result<()> {
+    let Request {
+        config,
+        command,
+        trigger,
+        status,
+        output,
+        verbose,
+        argv,
+        parse_command,
+    } = request;
     // An empty file means "dismissed" to the Zsh integration.
     fs::write(output, "").with_context(|| format!("could not initialize {}", output.display()))?;
 
+    let parsed_argv;
+    let argv = if parse_command {
+        parsed_argv = cli_study::parse_command_argv(command);
+        &parsed_argv
+    } else {
+        argv
+    };
     let mut context = suggestion_context(command, trigger, status);
     match cli_study::maybe_context(argv, config, verbose)? {
         cli_study::ContextOutcome::Continue(Some(cli_context)) => {

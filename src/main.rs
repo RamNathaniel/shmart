@@ -55,36 +55,41 @@ struct ShellArgs {
 
 #[derive(Debug, Subcommand)]
 enum ShellCommand {
-    /// Install the native Zsh integration and update .zshrc.
-    Install(ZshFileArgs),
-    /// Show whether the native Zsh integration is installed.
-    Status(ZshPathArgs),
-    /// Remove shmart's managed block from .zshrc.
-    Uninstall(ZshPathArgs),
+    /// Install the native integration and update the shell startup file.
+    Install(ShellFileArgs),
+    /// Show whether the native shell integration is installed.
+    Status(ShellPathArgs),
+    /// Remove shmart's managed block from the shell startup file.
+    Uninstall(ShellPathArgs),
 }
 
 #[derive(Debug, Args)]
-struct ZshFileArgs {
+struct ShellFileArgs {
     #[command(flatten)]
-    target: ZshPathArgs,
+    target: ShellPathArgs,
     /// Show the files and source block without changing anything.
     #[arg(long)]
     dry_run: bool,
 }
 
 #[derive(Debug, Args)]
-struct ZshPathArgs {
-    /// Shell to integrate with. Only Zsh is supported in this release.
+struct ShellPathArgs {
+    /// Shell to integrate with.
     #[arg(value_enum)]
     shell: SupportedShell,
-    /// Override the .zshrc path.
-    #[arg(long, value_name = "FILE")]
-    zshrc: Option<PathBuf>,
+    /// Override the shell startup file path.
+    #[arg(
+        long = "rc-file",
+        visible_aliases = ["zshrc", "bashrc"],
+        value_name = "FILE"
+    )]
+    rc_file: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum SupportedShell {
     Zsh,
+    Bash,
 }
 
 #[derive(Debug, Args)]
@@ -106,6 +111,8 @@ struct SuggestArgs {
     output: PathBuf,
     #[arg(long, action = clap::ArgAction::Append, num_args = 1, allow_hyphen_values = true)]
     argv: Vec<String>,
+    #[arg(long)]
+    parse_command: bool,
 }
 
 #[derive(Debug, Args)]
@@ -207,13 +214,27 @@ async fn main() -> Result<()> {
         }
         Some(Command::ConfigPath) => println!("{}", config_path.display()),
         Some(Command::Shell(args)) => match args.command {
-            ShellCommand::Install(args) => {
-                shell::install_zsh(args.target.zshrc.as_deref(), args.dry_run)?
-            }
-            ShellCommand::Status(args) => shell::status_zsh(args.zshrc.as_deref())?,
-            ShellCommand::Uninstall(args) => shell::uninstall_zsh(args.zshrc.as_deref())?,
+            ShellCommand::Install(args) => match args.target.shell {
+                SupportedShell::Zsh => {
+                    shell::install_zsh(args.target.rc_file.as_deref(), args.dry_run)?
+                }
+                SupportedShell::Bash => {
+                    shell::install_bash(args.target.rc_file.as_deref(), args.dry_run)?
+                }
+            },
+            ShellCommand::Status(args) => match args.shell {
+                SupportedShell::Zsh => shell::status_zsh(args.rc_file.as_deref())?,
+                SupportedShell::Bash => shell::status_bash(args.rc_file.as_deref())?,
+            },
+            ShellCommand::Uninstall(args) => match args.shell {
+                SupportedShell::Zsh => shell::uninstall_zsh(args.rc_file.as_deref())?,
+                SupportedShell::Bash => shell::uninstall_bash(args.rc_file.as_deref())?,
+            },
         },
-        Some(Command::Init(_args)) => shell::print_zsh_init()?,
+        Some(Command::Init(args)) => match args.shell {
+            SupportedShell::Zsh => shell::print_zsh_init()?,
+            SupportedShell::Bash => shell::print_bash_init()?,
+        },
         Some(Command::Cli(args)) => match args.command {
             CliStudyCommand::Study(args) => {
                 let api_key_env = optional_api_key_env(&config_path);
@@ -234,20 +255,21 @@ async fn main() -> Result<()> {
         Some(Command::Suggest(args)) => {
             let config = load_config(&config_path)?;
             config.validate()?;
-            menu::run(
-                &config,
-                &args.command,
-                args.trigger,
-                args.status,
-                &args.output,
-                cli.verbose,
-                &args.argv,
-            )
+            menu::run(menu::Request {
+                config: &config,
+                command: &args.command,
+                trigger: args.trigger,
+                status: args.status,
+                output: &args.output,
+                verbose: cli.verbose,
+                argv: &args.argv,
+                parse_command: args.parse_command,
+            })
             .await?;
         }
         None => {
             Cli::command().print_help()?;
-            println!("\n\nInstall the native Zsh integration with: shmart shell install zsh");
+            println!("\n\nInstall a native integration with: shmart shell install zsh|bash");
         }
     }
 

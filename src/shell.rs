@@ -7,49 +7,121 @@ use std::{
 use anyhow::{Context, Result, bail};
 use directories::BaseDirs;
 
-const PLUGIN_TEMPLATE: &str = include_str!("../shell/shmart.zsh");
+const ZSH_PLUGIN_TEMPLATE: &str = include_str!("../shell/shmart.zsh");
+const BASH_PLUGIN_TEMPLATE: &str = include_str!("../shell/shmart.bash");
 const BLOCK_BEGIN: &str = "# >>> shmart shell integration >>>";
 const BLOCK_END: &str = "# <<< shmart shell integration <<<";
 
+#[derive(Clone, Copy)]
+struct ShellSpec {
+    display: &'static str,
+    rc_label: &'static str,
+    integration_file: &'static str,
+    template: &'static str,
+    restart: &'static str,
+    uses_zdotdir: bool,
+}
+
+const ZSH: ShellSpec = ShellSpec {
+    display: "Zsh",
+    rc_label: "zshrc",
+    integration_file: "shmart.zsh",
+    template: ZSH_PLUGIN_TEMPLATE,
+    restart: "exec zsh",
+    uses_zdotdir: true,
+};
+
+const BASH: ShellSpec = ShellSpec {
+    display: "Bash",
+    rc_label: "bashrc",
+    integration_file: "shmart.bash",
+    template: BASH_PLUGIN_TEMPLATE,
+    restart: "exec /bin/bash",
+    uses_zdotdir: false,
+};
+
 pub fn print_zsh_init() -> Result<()> {
-    print!("{}", rendered_plugin()?);
-    Ok(())
+    print_init(ZSH)
+}
+
+pub fn print_bash_init() -> Result<()> {
+    print_init(BASH)
 }
 
 pub fn install_zsh(zshrc_override: Option<&Path>, dry_run: bool) -> Result<()> {
-    let zshrc = zshrc_path(zshrc_override)?;
-    let integration = integration_path()?;
-    let old = read_optional(&zshrc)?;
-    let source_line = format!("source {}", zsh_quote(&integration.display().to_string()));
+    install(ZSH, zshrc_override, dry_run)
+}
+
+pub fn install_bash(bashrc_override: Option<&Path>, dry_run: bool) -> Result<()> {
+    install(BASH, bashrc_override, dry_run)
+}
+
+pub fn status_zsh(zshrc_override: Option<&Path>) -> Result<()> {
+    status(ZSH, zshrc_override)
+}
+
+pub fn status_bash(bashrc_override: Option<&Path>) -> Result<()> {
+    status(BASH, bashrc_override)
+}
+
+pub fn uninstall_zsh(zshrc_override: Option<&Path>) -> Result<()> {
+    uninstall(ZSH, zshrc_override)
+}
+
+pub fn uninstall_bash(bashrc_override: Option<&Path>) -> Result<()> {
+    uninstall(BASH, bashrc_override)
+}
+
+fn print_init(spec: ShellSpec) -> Result<()> {
+    print!("{}", rendered_plugin(spec.template)?);
+    Ok(())
+}
+
+fn install(spec: ShellSpec, rc_override: Option<&Path>, dry_run: bool) -> Result<()> {
+    let rc_file = rc_path(spec, rc_override)?;
+    let integration = integration_path(spec.integration_file)?;
+    let old = read_optional(&rc_file)?;
+    let source_line = format!("source {}", shell_quote(&integration.display().to_string()));
     let block = format!("{BLOCK_BEGIN}\n{source_line}\n{BLOCK_END}");
     let new = replace_managed_block(&old, Some(&block))?;
 
     if dry_run {
-        println!("Would write Zsh integration: {}", integration.display());
-        println!("Would update: {}", zshrc.display());
+        println!(
+            "Would write {} integration: {}",
+            spec.display,
+            integration.display()
+        );
+        println!("Would update: {}", rc_file.display());
         println!("\n{block}");
         return Ok(());
     }
 
-    atomic_write(&integration, rendered_plugin()?.as_bytes())?;
+    atomic_write(&integration, rendered_plugin(spec.template)?.as_bytes())?;
     if new != old {
-        backup_if_present(&zshrc)?;
-        atomic_write(&zshrc, new.as_bytes())?;
+        backup_if_present(&rc_file)?;
+        atomic_write(&rc_file, new.as_bytes())?;
     }
 
-    println!("Installed Zsh integration at {}", integration.display());
-    println!("Updated {}", zshrc.display());
-    println!("Start a new Zsh session or run: exec zsh");
+    println!(
+        "Installed {} integration at {}",
+        spec.display,
+        integration.display()
+    );
+    println!("Updated {}", rc_file.display());
+    println!(
+        "Start a new {} session or run: {}",
+        spec.display, spec.restart
+    );
     Ok(())
 }
 
-pub fn status_zsh(zshrc_override: Option<&Path>) -> Result<()> {
-    let zshrc = zshrc_path(zshrc_override)?;
-    let integration = integration_path()?;
-    let contents = read_optional(&zshrc)?;
+fn status(spec: ShellSpec, rc_override: Option<&Path>) -> Result<()> {
+    let rc_file = rc_path(spec, rc_override)?;
+    let integration = integration_path(spec.integration_file)?;
+    let contents = read_optional(&rc_file)?;
     let configured = contents.contains(BLOCK_BEGIN) && contents.contains(BLOCK_END);
 
-    println!("zshrc: {}", zshrc.display());
+    println!("{}: {}", spec.rc_label, rc_file.display());
     println!(
         "managed source block: {}",
         if configured {
@@ -70,52 +142,60 @@ pub fn status_zsh(zshrc_override: Option<&Path>) -> Result<()> {
     Ok(())
 }
 
-pub fn uninstall_zsh(zshrc_override: Option<&Path>) -> Result<()> {
-    let zshrc = zshrc_path(zshrc_override)?;
-    let old = read_optional(&zshrc)?;
+fn uninstall(spec: ShellSpec, rc_override: Option<&Path>) -> Result<()> {
+    let rc_file = rc_path(spec, rc_override)?;
+    let old = read_optional(&rc_file)?;
     let new = replace_managed_block(&old, None)?;
     if new == old {
-        println!("No managed shmart block found in {}", zshrc.display());
+        println!("No managed shmart block found in {}", rc_file.display());
         return Ok(());
     }
 
-    backup_if_present(&zshrc)?;
-    atomic_write(&zshrc, new.as_bytes())?;
-    println!("Removed the managed shmart block from {}", zshrc.display());
+    backup_if_present(&rc_file)?;
+    atomic_write(&rc_file, new.as_bytes())?;
+    println!(
+        "Removed the managed shmart block from {}",
+        rc_file.display()
+    );
     println!("The integration file was retained so uninstall is recoverable.");
     Ok(())
 }
 
-fn integration_path() -> Result<PathBuf> {
+fn integration_path(file_name: &str) -> Result<PathBuf> {
     let dirs = BaseDirs::new().context("could not determine the user configuration directory")?;
     Ok(dirs
         .config_dir()
         .join("shmart")
         .join("shell")
-        .join("shmart.zsh"))
+        .join(file_name))
 }
 
-fn zshrc_path(override_path: Option<&Path>) -> Result<PathBuf> {
+fn rc_path(spec: ShellSpec, override_path: Option<&Path>) -> Result<PathBuf> {
     if let Some(path) = override_path {
         return Ok(path.to_owned());
     }
-    if let Some(zdotdir) = env::var_os("ZDOTDIR") {
+    let zdotdir = spec.uses_zdotdir.then(|| env::var_os("ZDOTDIR")).flatten();
+    if let Some(zdotdir) = zdotdir {
         return Ok(PathBuf::from(zdotdir).join(".zshrc"));
     }
     let dirs = BaseDirs::new().context("could not determine the home directory")?;
-    Ok(dirs.home_dir().join(".zshrc"))
+    Ok(dirs.home_dir().join(if spec.uses_zdotdir {
+        ".zshrc"
+    } else {
+        ".bashrc"
+    }))
 }
 
-fn rendered_plugin() -> Result<String> {
+fn rendered_plugin(template: &str) -> Result<String> {
     let executable =
         env::current_exe().context("could not determine the shmart executable path")?;
-    Ok(PLUGIN_TEMPLATE.replace(
+    Ok(template.replace(
         "@SHMART_BIN@",
-        &zsh_quote(&executable.display().to_string()),
+        &shell_quote(&executable.display().to_string()),
     ))
 }
 
-fn zsh_quote(value: &str) -> String {
+fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
 }
 
@@ -173,7 +253,7 @@ fn backup_if_present(path: &Path) -> Result<()> {
     let file_name = path
         .file_name()
         .and_then(|name| name.to_str())
-        .context("zshrc path has no valid file name")?;
+        .context("shell startup path has no valid file name")?;
     let backup = path.with_file_name(format!("{file_name}.shmart-backup-{timestamp}"));
     fs::copy(path, &backup).with_context(|| {
         format!(
@@ -230,14 +310,22 @@ mod tests {
 
     #[test]
     fn escapes_single_quotes_for_zsh() {
-        assert_eq!(zsh_quote("one'two"), "'one'\\''two'");
+        assert_eq!(shell_quote("one'two"), "'one'\\''two'");
     }
 
     #[test]
     fn plugin_wraps_accept_line_and_has_no_child_shell() {
-        assert!(PLUGIN_TEMPLATE.contains("zle -N accept-line _shmart_accept_line"));
-        assert!(PLUGIN_TEMPLATE.contains("add-zsh-hook preexec"));
-        assert!(PLUGIN_TEMPLATE.contains("--argv"));
-        assert!(!PLUGIN_TEMPLATE.contains("exec zsh -c"));
+        assert!(ZSH_PLUGIN_TEMPLATE.contains("zle -N accept-line _shmart_accept_line"));
+        assert!(ZSH_PLUGIN_TEMPLATE.contains("add-zsh-hook preexec"));
+        assert!(ZSH_PLUGIN_TEMPLATE.contains("--argv"));
+        assert!(!ZSH_PLUGIN_TEMPLATE.contains("exec zsh -c"));
+    }
+
+    #[test]
+    fn bash_plugin_uses_prompt_hook_and_same_shell_eval() {
+        assert!(BASH_PLUGIN_TEMPLATE.contains("PROMPT_COMMAND"));
+        assert!(BASH_PLUGIN_TEMPLATE.contains("builtin eval --"));
+        assert!(BASH_PLUGIN_TEMPLATE.contains("--parse-command"));
+        assert!(!BASH_PLUGIN_TEMPLATE.contains("bash -c"));
     }
 }

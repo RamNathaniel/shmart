@@ -1,24 +1,25 @@
 # shmart
 
 `shmart` adds command suggestions and command-repair menus to an existing Zsh
-session. It is a Zsh plugin with a small Rust companion process—not a shell,
-terminal emulator, command executor, or autonomous agent.
+or Bash session. It is a native shell plugin with a small Rust companion
+process—not a shell, terminal emulator, command executor, or autonomous agent.
 
 ## How it works
 
-- Ordinary input is accepted and executed by the current Zsh without invoking a
+- Ordinary input is accepted and executed by the current shell without invoking a
   model.
-- `shmart <intent>` opens a suggestion menu before Zsh executes anything.
+- `shmart <intent>` opens a suggestion menu before anything is executed.
 - A likely command-usage failure opens the same menu after the command returns.
 - The configured model receives plain text and returns validated JSON. It gets
   no tools and cannot execute commands.
-- Rust displays the menu and returns the selected text to ZLE. The existing Zsh
-  executes it, preserving `cd`, exports, aliases, functions, jobs, and options.
+- Rust displays the menu and returns the selected text to the integration. The
+  existing Zsh or Bash process executes it, preserving `cd`, exports, aliases,
+  functions, jobs, and options.
 
-The native plugin does not capture or redirect command output. It uses exit
-status plus targeted Zsh/Git checks to avoid prompting after ordinary failures.
-That classifier is part of the active integration; Rust contains no second
-error-detection or execution path.
+The native plugins do not capture or redirect command output. They use exit
+status plus targeted shell/Git checks to avoid prompting after ordinary
+failures. That classifier is part of each integration; Rust contains no second
+error-detection or command-execution path.
 
 ## Build
 
@@ -75,7 +76,7 @@ api_key_env = "DEEPSEEK_API_KEY"
 timeout_seconds = 45
 ```
 
-## Install the Zsh integration
+## Install a shell integration
 
 With `shmart` on `PATH`:
 
@@ -106,12 +107,36 @@ shmart init zsh
 Uninstall removes only the managed `.zshrc` block and retains the generated
 integration file for recovery.
 
+For Bash, including the `/bin/bash` 3.2 shipped with macOS:
+
+```bash
+shmart shell install bash
+exec /bin/bash
+```
+
+The Bash installer writes `shmart.bash` to Shmart's integration directory and
+adds the managed source block to `~/.bashrc`. If a login-only Bash setup does
+not load `.bashrc`, source it from `.bash_profile` or run `source ~/.bashrc`.
+Bash uses a `shmart` function for explicit requests and a `PROMPT_COMMAND` hook
+for failed commands. Selected commands are evaluated by the current Bash
+process, so shell state remains persistent.
+
+```bash
+shmart shell install bash --dry-run
+shmart shell status bash
+shmart shell uninstall bash
+shmart init bash
+```
+
+Use `--rc-file FILE` to operate on a different startup file. `--zshrc` and
+`--bashrc` remain readable aliases for that option.
+
 Running `shmart` without arguments prints CLI help. It never starts another
 shell or prompt.
 
 ## Use
 
-Continue using the normal Zsh prompt:
+Continue using the normal shell prompt:
 
 ```console
 % cd ~/git/project

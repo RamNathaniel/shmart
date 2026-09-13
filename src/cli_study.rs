@@ -125,6 +125,41 @@ pub enum ContextOutcome {
     Cancelled,
 }
 
+pub fn parse_command_argv(command: &str) -> Vec<String> {
+    let Ok(argv) = shell_words::split(command) else {
+        return Vec::new();
+    };
+    if argv.iter().any(|word| {
+        matches!(
+            word.as_str(),
+            "|" | "|&"
+                | "||"
+                | "&&"
+                | ";"
+                | "&"
+                | "("
+                | ")"
+                | "{"
+                | "}"
+                | "<"
+                | ">"
+                | ">>"
+                | "<<"
+                | "<<<"
+                | "<&"
+                | ">&"
+        ) || is_numbered_redirection(word)
+    }) {
+        return Vec::new();
+    }
+    argv
+}
+
+fn is_numbered_redirection(word: &str) -> bool {
+    let digit_count = word.bytes().take_while(u8::is_ascii_digit).count();
+    digit_count > 0 && matches!(word.as_bytes().get(digit_count), Some(b'<' | b'>'))
+}
+
 pub fn maybe_context(argv: &[String], config: &Config, verbose: bool) -> Result<ContextOutcome> {
     let Some(candidate) = detect(argv)? else {
         return Ok(ContextOutcome::Continue(None));
@@ -1445,6 +1480,16 @@ mod tests {
                 .is_none()
         );
         assert!(detect(&["python3".into(), "-".into()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn conservatively_parses_simple_bash_history_commands() {
+        assert_eq!(
+            parse_command_argv("python3 'tool with spaces.py' --count 2"),
+            ["python3", "tool with spaces.py", "--count", "2"]
+        );
+        assert!(parse_command_argv("python3 tool.py | cat").is_empty());
+        assert!(parse_command_argv("python3 tool.py 2> errors.log").is_empty());
     }
 
     #[test]
