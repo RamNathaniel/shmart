@@ -34,12 +34,10 @@ pub async fn run(
         if verbose {
             eprintln!(
                 "Requesting command suggestions from {}…",
-                config.local.model
+                config.model.model
             );
         }
-        let response = ModelApi::new()?
-            .immediate_suggestions(config, &context)
-            .await?;
+        let response = ModelApi::new()?.suggestions(config, &context).await?;
         let menu = suggestion::parse(&response)?;
         render_menu(&menu);
 

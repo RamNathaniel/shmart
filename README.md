@@ -1,141 +1,117 @@
 # shmart
 
-`shmart` is a low-latency terminal assistant that integrates with your existing
-Zsh session. It is not a shell and does not open a nested shell.
+`shmart` adds command suggestions and command-repair menus to an existing Zsh
+session. It is a Zsh plugin with a small Rust companion process—not a shell,
+terminal emulator, command executor, or autonomous agent.
 
-- Ordinary commands run normally in Zsh without contacting an LLM.
-- `shmart <intent>` asks for help before anything runs.
-- After a likely command-usage failure, Shmart offers corrected commands.
-- A selected command is returned to Zsh's editable buffer and executed by the
-  same persistent shell.
-- The model receives no tools or terminal access. It returns validated JSON;
-  Rust renders the menu, and the Zsh integration performs the selected action.
+## How it works
 
-This means shell state persists across every command, including `cd`, exported
-variables, aliases, functions, jobs, and shell options.
+- Ordinary input is accepted and executed by the current Zsh without invoking a
+  model.
+- `shmart <intent>` opens a suggestion menu before Zsh executes anything.
+- A likely command-usage failure opens the same menu after the command returns.
+- The configured model receives plain text and returns validated JSON. It gets
+  no tools and cannot execute commands.
+- Rust displays the menu and returns the selected text to ZLE. The existing Zsh
+  executes it, preserving `cd`, exports, aliases, functions, jobs, and options.
 
-## Requirements
-
-- macOS with Zsh for the initial native integration.
-- Rust 1.85 or newer to build from source.
-- Either a local OpenAI-compatible model server or an authenticated compatible
-  endpoint.
-- For the default local setup, a current `llama.cpp` build with Metal support
-  and roughly 3–4.5 GB of free unified memory.
+The native plugin does not capture or redirect command output. It uses exit
+status plus targeted Zsh/Git checks to avoid prompting after ordinary failures.
+That classifier is part of the active integration; Rust contains no second
+error-detection or execution path.
 
 ## Build
+
+Shmart requires Rust 1.85 or newer.
 
 ```bash
 cargo build --release
 ```
 
-The resulting binary is `target/release/shmart`. The helper builds and forwards
-any arguments:
+The executable is `target/release/shmart`. The helper script builds it and
+forwards its arguments:
 
 ```bash
 ./build-and-run.sh --help
 ```
 
-For local development, either copy the binary onto `PATH` or invoke its absolute
-path when installing the integration. The generated plugin remembers that path
-and exposes the `shmart` management command in the shell when no existing
-command or function has that name.
+## Configure the suggestion model
 
-## Configure models
-
-Run interactive setup:
+Interactive setup defaults to DeepSeek:
 
 ```bash
-shmart setup
+./target/release/shmart setup
 ```
 
-Cloud choices include OpenAI, Anthropic, OpenRouter, DeepSeek, a custom
-OpenAI-compatible endpoint, or no cloud model. If cloud delegation is disabled
-or unavailable, the immediate model also handles heavier reasoning.
-
-Examples:
+Non-interactive examples:
 
 ```bash
 shmart setup --provider deepseek
-shmart setup --provider none
-shmart setup --provider openai --model YOUR_MODEL_NAME
-```
-
-To use DeepSeek Flash for both tiers:
-
-```bash
+shmart setup --provider openai --model MODEL_NAME
+shmart setup --provider openrouter --model provider/model-name
 shmart setup \
-  --provider deepseek \
-  --model deepseek-v4-flash \
-  --local-endpoint https://api.deepseek.com/chat/completions \
-  --local-model deepseek-v4-flash \
-  --local-api-key-env DEEPSEEK_API_KEY
+  --provider custom \
+  --endpoint https://example.test/v1/chat/completions \
+  --model MODEL_NAME \
+  --api-key-env EXAMPLE_API_KEY
 ```
 
-API keys are referenced by environment-variable name and are never stored in
-the configuration file. Print its location or check connectivity with:
+Supported endpoints use the OpenAI-compatible chat-completions response shape.
+DeepSeek defaults to `deepseek-v4-flash` and `DEEPSEEK_API_KEY`. API keys are
+read from the named environment variable and are never stored in the config.
 
 ```bash
 shmart config-path
 shmart doctor
 ```
 
-Existing configuration under the old `smartsh` application directory is copied
-to the new `shmart` directory on first use. The legacy file is retained.
+The current configuration format contains only the model used for menus:
 
-## Start the default local model
-
-```bash
-llama serve \
-  -hf ibm-granite/granite-4.2-3b-GGUF:Q4_K_M \
-  -c 8192 \
-  -ngl 99 \
-  --jinja \
-  --port 8080
+```toml
+[model]
+endpoint = "https://api.deepseek.com/chat/completions"
+model = "deepseek-v4-flash"
+api_key_env = "DEEPSEEK_API_KEY"
+timeout_seconds = 45
 ```
-
-The first launch downloads the model from Hugging Face. Keep the server running
-in a separate terminal.
 
 ## Install the Zsh integration
 
-With the binary on `PATH`, run:
+With `shmart` on `PATH`:
 
 ```bash
 shmart shell install zsh
 exec zsh
 ```
 
-From this source checkout, the equivalent command is:
+From this source checkout:
 
 ```bash
 ./target/release/shmart shell install zsh
+exec zsh
 ```
 
-Installation writes the versioned integration to Shmart's user configuration
-directory and appends one idempotent managed block to `${ZDOTDIR:-$HOME}/.zshrc`.
-If `.zshrc` already exists, it is backed up before modification.
-
-Useful management commands:
+Installation writes the generated integration to Shmart's user configuration
+directory and adds one managed source block to `${ZDOTDIR:-$HOME}/.zshrc`. An
+existing `.zshrc` is backed up before modification.
 
 ```bash
 shmart shell install zsh --dry-run
 shmart shell status zsh
 shmart shell uninstall zsh
-shmart init zsh                    # print integration for a dotfile manager
+shmart init zsh
 ```
 
-Pass `--zshrc FILE` to the install, status, or uninstall command to operate on a
-different file. Uninstall removes only Shmart's managed source block and leaves
-the generated integration file in place for recovery.
+`shmart init zsh` prints the integration for use with a dotfile manager.
+Uninstall removes only the managed `.zshrc` block and retains the generated
+integration file for recovery.
 
-Running `shmart` without arguments prints CLI help; it does not create another
-shell or another prompt.
+Running `shmart` without arguments prints CLI help. It never starts another
+shell or prompt.
 
 ## Use
 
-Continue using the normal Zsh prompt. These lines bypass the LLM and execute
-normally:
+Continue using the normal Zsh prompt:
 
 ```console
 % cd ~/git/project
@@ -143,81 +119,25 @@ normally:
 % git status
 ```
 
-Ask for command suggestions explicitly:
+Ask explicitly:
 
 ```console
 % shmart find the five largest files here
 ```
 
-Shmart intercepts that line before Zsh parses it and displays two to four
-options. Commands are bold cyan, explanations are dim, menu control keys are
-yellow, and the FYI section is blue. Selecting a command returns it to the
-current Zsh line editor and accepts it, so the same Zsh process executes it.
-Set `NO_COLOR=1` to disable terminal styling. Use `shmart -- <intent>` when the
-intent begins with a Shmart management-command word such as `setup` or
-`doctor`.
+Use `shmart -- <intent>` when an intent begins with a management-command word
+such as `setup` or `doctor`.
 
-The menu temporarily switches the terminal from ZLE's raw input mode to normal
-canonical input. Enter and editing behave normally, Ctrl-C cancels, and Ctrl-D
-closes the menu input. ZLE's prior terminal mode is restored when the menu
-exits. Ctrl-Z retains its ordinary job-control meaning and is not a cancellation
-key; use Ctrl-C or `q` to dismiss the menu.
+Generated commands are bold cyan, explanations are dim, menu keys are yellow,
+and the FYI section is blue. Set `NO_COLOR=1` for plain output. Model-provided
+terminal control characters are escaped before display.
 
-After likely usage errors, Shmart opens the same menu automatically. The first
-release detects standard command-not-found and usage exit statuses, Zsh glob
-parse failures, and unknown Git subcommands. Native integration intentionally
-does not capture or redirect stderr because doing so would break normal
-interactive terminal behavior; consequently, no exit-status-only heuristic can
-identify every usage error.
-
-The menu's FYI section may suggest optional tools and installation commands.
-Those entries are informational and cannot be selected or executed by Shmart.
-
-The one-shot agent remains available for scripted or legacy use:
-
-```bash
-shmart ask "show the five largest files in this directory"
-shmart ask --dry-run "remove generated log files older than seven days"
-shmart ask --no-cloud "show the current git branch"
-```
-
-## Model boundary
-
-Shmart sends plain system and user messages and asks for a JSON object matching
-an explicit schema. It does not provide function tools, shell tools, filesystem
-tools, or network tools to either model. Rust strictly validates every response
-before displaying it. In native Zsh mode, Rust also never executes a selected
-suggestion; it writes that selection to a private temporary handoff file, and
-the Zsh line editor executes it in the current shell.
-
-## Configuration
-
-The generated TOML contains:
-
-```toml
-[local]
-endpoint = "http://127.0.0.1:8080/v1/chat/completions"
-model = "ibm-granite/granite-4.2-3b-GGUF:Q4_K_M"
-api_key_env = ""
-timeout_seconds = 45
-
-[cloud]
-enabled = false
-provider = "open_ai_compatible"
-endpoint = ""
-model = ""
-api_key_env = ""
-timeout_seconds = 120
-
-[behavior]
-max_steps = 6
-output_limit_bytes = 16384
-command_timeout_seconds = 30
-auto_execute_read_only = true
-```
+Choose a number to execute that command in the current Zsh, enter a replacement
+command, press `o` to describe another option, or press `q`/Ctrl-C to dismiss.
+Ctrl-D closes menu input. Ctrl-Z retains normal job-control semantics and is not
+a cancellation key.
 
 ## Security boundary
 
-`shmart` is not a sandbox. Always review generated commands and use `q` to
-dismiss a menu. The native integration executes selected suggestions with your
-current user's permissions and current shell state.
+Shmart is not a sandbox. A selected command executes with the current user's
+permissions and shell state. Review generated commands before selecting them.

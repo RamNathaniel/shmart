@@ -141,7 +141,7 @@ _shmart_is_management_command() {
     esac
   done
   case ${words[index]:-} in
-    setup|ask|doctor|config-path|shell|init|help|-h|--help|-V|--version)
+    setup|doctor|config-path|shell|init|help|-h|--help|-V|--version)
       return 0
       ;;
   esac

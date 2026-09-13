@@ -140,7 +140,7 @@ mod tests {
     }
 
     #[test]
-    fn schema_leaves_item_count_validation_to_local_parser() {
+    fn schema_leaves_item_count_validation_to_parser() {
         let schema = schema().to_string();
         assert!(schema.contains("suggestions"));
         assert!(schema.contains("fyi"));

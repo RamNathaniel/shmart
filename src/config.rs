@@ -7,93 +7,34 @@ use anyhow::{Context, Result, bail};
 use directories::BaseDirs;
 use serde::{Deserialize, Serialize};
 
-pub const DEFAULT_LOCAL_MODEL: &str = "ibm-granite/granite-4.2-3b-GGUF:Q4_K_M";
-pub const DEFAULT_LOCAL_ENDPOINT: &str = "http://127.0.0.1:8080/v1/chat/completions";
+pub const DEFAULT_MODEL: &str = "deepseek-v4-flash";
+pub const DEFAULT_ENDPOINT: &str = "https://api.deepseek.com/chat/completions";
+pub const DEFAULT_API_KEY_ENV: &str = "DEEPSEEK_API_KEY";
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
-    #[serde(default)]
-    pub local: LocalConfig,
-    #[serde(default)]
-    pub cloud: CloudConfig,
-    #[serde(default)]
-    pub behavior: BehaviorConfig,
+    pub model: ModelConfig,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LocalConfig {
+#[serde(deny_unknown_fields)]
+pub struct ModelConfig {
     pub endpoint: String,
     pub model: String,
     #[serde(default)]
     pub api_key_env: String,
-    #[serde(default = "default_local_timeout")]
+    #[serde(default = "default_timeout")]
     pub timeout_seconds: u64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct CloudConfig {
-    #[serde(default)]
-    pub enabled: bool,
-    #[serde(default)]
-    pub provider: CloudProvider,
-    pub endpoint: String,
-    pub model: String,
-    pub api_key_env: String,
-    #[serde(default = "default_cloud_timeout")]
-    pub timeout_seconds: u64,
-}
-
-#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
-pub enum CloudProvider {
-    #[default]
-    OpenAiCompatible,
-    Anthropic,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct BehaviorConfig {
-    #[serde(default = "default_max_steps")]
-    pub max_steps: usize,
-    #[serde(default = "default_output_limit")]
-    pub output_limit_bytes: usize,
-    #[serde(default = "default_command_timeout")]
-    pub command_timeout_seconds: u64,
-    #[serde(default = "enabled")]
-    pub auto_execute_read_only: bool,
-}
-
-impl Default for LocalConfig {
+impl Default for ModelConfig {
     fn default() -> Self {
         Self {
-            endpoint: DEFAULT_LOCAL_ENDPOINT.to_owned(),
-            model: DEFAULT_LOCAL_MODEL.to_owned(),
-            api_key_env: String::new(),
-            timeout_seconds: default_local_timeout(),
-        }
-    }
-}
-
-impl Default for CloudConfig {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            provider: CloudProvider::OpenAiCompatible,
-            endpoint: String::new(),
-            model: String::new(),
-            api_key_env: String::new(),
-            timeout_seconds: default_cloud_timeout(),
-        }
-    }
-}
-
-impl Default for BehaviorConfig {
-    fn default() -> Self {
-        Self {
-            max_steps: default_max_steps(),
-            output_limit_bytes: default_output_limit(),
-            command_timeout_seconds: default_command_timeout(),
-            auto_execute_read_only: true,
+            endpoint: DEFAULT_ENDPOINT.into(),
+            model: DEFAULT_MODEL.into(),
+            api_key_env: DEFAULT_API_KEY_ENV.into(),
+            timeout_seconds: default_timeout(),
         }
     }
 }
@@ -115,25 +56,16 @@ impl Config {
     }
 
     pub fn validate(&self) -> Result<()> {
-        validate_http_endpoint("local.endpoint", &self.local.endpoint)?;
-        if self.local.model.trim().is_empty() {
-            bail!("local.model cannot be empty");
+        if !(self.model.endpoint.starts_with("http://")
+            || self.model.endpoint.starts_with("https://"))
+        {
+            bail!("model.endpoint must start with http:// or https://");
         }
-        if self.behavior.max_steps == 0 || self.behavior.max_steps > 20 {
-            bail!("behavior.max_steps must be between 1 and 20");
+        if self.model.model.trim().is_empty() {
+            bail!("model.model cannot be empty");
         }
-        if self.behavior.output_limit_bytes < 1024 {
-            bail!("behavior.output_limit_bytes must be at least 1024");
-        }
-
-        if self.cloud.enabled {
-            validate_http_endpoint("cloud.endpoint", &self.cloud.endpoint)?;
-            if self.cloud.model.trim().is_empty() {
-                bail!("cloud.model cannot be empty when cloud delegation is enabled");
-            }
-            if self.cloud.api_key_env.trim().is_empty() {
-                bail!("cloud.api_key_env cannot be empty when cloud delegation is enabled");
-            }
+        if self.model.timeout_seconds == 0 {
+            bail!("model.timeout_seconds must be greater than zero");
         }
         Ok(())
     }
@@ -147,58 +79,8 @@ pub fn resolve_path(override_path: Option<&Path>) -> Result<PathBuf> {
     Ok(dirs.config_dir().join("shmart").join("config.toml"))
 }
 
-pub fn migrate_legacy_config(destination: &Path) -> Result<()> {
-    if destination.exists() {
-        return Ok(());
-    }
-    let dirs = BaseDirs::new().context("could not determine the user configuration directory")?;
-    let legacy = dirs.config_dir().join("smartsh").join("config.toml");
-    if !legacy.is_file() {
-        return Ok(());
-    }
-    if let Some(parent) = destination.parent() {
-        fs::create_dir_all(parent)
-            .with_context(|| format!("failed to create {}", parent.display()))?;
-    }
-    fs::copy(&legacy, destination).with_context(|| {
-        format!(
-            "failed to migrate {} to {}",
-            legacy.display(),
-            destination.display()
-        )
-    })?;
-    eprintln!(
-        "Migrated configuration from {} to {} (the original was retained).",
-        legacy.display(),
-        destination.display()
-    );
-    Ok(())
-}
-
-fn validate_http_endpoint(name: &str, endpoint: &str) -> Result<()> {
-    if !(endpoint.starts_with("http://") || endpoint.starts_with("https://")) {
-        bail!("{name} must start with http:// or https://");
-    }
-    Ok(())
-}
-
-fn default_local_timeout() -> u64 {
+fn default_timeout() -> u64 {
     45
-}
-fn default_cloud_timeout() -> u64 {
-    120
-}
-fn default_max_steps() -> usize {
-    6
-}
-fn default_output_limit() -> usize {
-    16 * 1024
-}
-fn default_command_timeout() -> u64 {
-    30
-}
-fn enabled() -> bool {
-    true
 }
 
 #[cfg(test)]
@@ -206,28 +88,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn defaults_validate() {
-        Config::default().validate().unwrap();
+    fn defaults_to_deepseek_and_validates() {
+        let config = Config::default();
+        config.validate().unwrap();
+        assert_eq!(config.model.model, DEFAULT_MODEL);
+        assert_eq!(config.model.endpoint, DEFAULT_ENDPOINT);
     }
 
     #[test]
-    fn enabled_cloud_requires_model() {
-        let mut config = Config::default();
-        config.cloud.enabled = true;
-        config.cloud.endpoint = "https://example.com/v1/chat/completions".into();
-        config.cloud.api_key_env = "EXAMPLE_KEY".into();
-        assert!(config.validate().is_err());
-    }
-
-    #[test]
-    fn old_local_config_without_credential_field_still_loads() {
-        let local: LocalConfig = toml::from_str(
+    fn rejects_retired_configuration_sections() {
+        let result = toml::from_str::<Config>(
             r#"
-endpoint = "http://127.0.0.1:8080/v1/chat/completions"
-model = "local-model"
+[local]
+endpoint = "http://localhost:8080/v1/chat/completions"
+model = "retired"
 "#,
-        )
-        .unwrap();
-        assert!(local.api_key_env.is_empty());
+        );
+        assert!(result.is_err());
     }
 }

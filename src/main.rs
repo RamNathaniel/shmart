@@ -1,10 +1,6 @@
-mod agent;
 mod api;
 mod config;
-mod decision;
-mod executor;
 mod menu;
-mod policy;
 mod setup;
 mod shell;
 mod suggestion;
@@ -23,7 +19,7 @@ struct Cli {
     #[arg(long, global = true, value_name = "FILE")]
     config: Option<PathBuf>,
 
-    /// Show routing choices, command explanations, and fallback diagnostics.
+    /// Show model request diagnostics.
     #[arg(long, global = true)]
     verbose: bool,
 
@@ -33,11 +29,9 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    /// Configure the local router and optional cloud reasoning model.
+    /// Configure the model that generates command suggestions.
     Setup(SetupArgs),
-    /// Ask shmart to complete a terminal task.
-    Ask(AskArgs),
-    /// Check configuration, credentials, and local model connectivity.
+    /// Check model configuration and credentials.
     Doctor,
     /// Print the active configuration file path.
     ConfigPath,
@@ -111,21 +105,19 @@ struct SuggestArgs {
 
 #[derive(Clone, Debug, ValueEnum)]
 enum SetupProvider {
-    None,
-    Openai,
-    Anthropic,
-    Openrouter,
     Deepseek,
+    Openai,
+    Openrouter,
     Custom,
 }
 
 #[derive(Debug, Args)]
 struct SetupArgs {
-    /// Cloud provider used when the immediate model delegates a complex task.
+    /// Provider used to generate command suggestions.
     #[arg(long, value_enum)]
     provider: Option<SetupProvider>,
 
-    /// Cloud model identifier, for example a provider-specific model name.
+    /// Provider-specific model identifier.
     #[arg(long)]
     model: Option<String>,
 
@@ -133,47 +125,18 @@ struct SetupArgs {
     #[arg(long)]
     endpoint: Option<String>,
 
-    /// Name of the environment variable containing the cloud API key.
+    /// Name of the environment variable containing the API key.
     #[arg(long)]
     api_key_env: Option<String>,
-
-    /// Local OpenAI-compatible chat-completions endpoint.
-    #[arg(long)]
-    local_endpoint: Option<String>,
-
-    /// Model name sent to the local endpoint.
-    #[arg(long)]
-    local_model: Option<String>,
-
-    /// Environment variable containing the immediate router's API key.
-    #[arg(long)]
-    local_api_key_env: Option<String>,
-}
-
-#[derive(Debug, Args)]
-struct AskArgs {
-    /// Describe the terminal result you want.
-    #[arg(required = true, num_args = 1..)]
-    prompt: Vec<String>,
-
-    /// Show the proposed operation without executing it.
-    #[arg(long)]
-    dry_run: bool,
-
-    /// Prevent delegation to the configured cloud model for this request.
-    #[arg(long)]
-    no_cloud: bool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let using_default_config = cli.config.is_none();
     let config_path = config::resolve_path(cli.config.as_deref())?;
 
     match cli.command {
         Some(Command::Setup(args)) => {
-            migrate_config_if_needed(using_default_config, &config_path)?;
             setup::run(
                 &config_path,
                 setup::SetupOptions {
@@ -181,26 +144,10 @@ async fn main() -> Result<()> {
                     model: args.model,
                     endpoint: args.endpoint,
                     api_key_env: args.api_key_env,
-                    local_endpoint: args.local_endpoint,
-                    local_model: args.local_model,
-                    local_api_key_env: args.local_api_key_env,
                 },
             )?;
         }
-        Some(Command::Ask(args)) => {
-            migrate_config_if_needed(using_default_config, &config_path)?;
-            let config = Config::load(&config_path).with_context(|| {
-                format!(
-                    "could not load {}; run `shmart setup` first",
-                    config_path.display()
-                )
-            })?;
-            config.validate()?;
-            let prompt = args.prompt.join(" ");
-            agent::run(&config, &prompt, args.dry_run, args.no_cloud, cli.verbose).await?;
-        }
         Some(Command::Doctor) => {
-            migrate_config_if_needed(using_default_config, &config_path)?;
             let config = Config::load(&config_path).with_context(|| {
                 format!(
                     "could not load {}; run `shmart setup` first",
@@ -208,7 +155,7 @@ async fn main() -> Result<()> {
                 )
             })?;
             config.validate()?;
-            api::doctor(&config, &config_path).await?;
+            api::doctor(&config, &config_path);
         }
         Some(Command::ConfigPath) => println!("{}", config_path.display()),
         Some(Command::Shell(args)) => match args.command {
@@ -220,7 +167,6 @@ async fn main() -> Result<()> {
         },
         Some(Command::Init(_args)) => shell::print_zsh_init()?,
         Some(Command::Suggest(args)) => {
-            migrate_config_if_needed(using_default_config, &config_path)?;
             let config = load_config(&config_path)?;
             config.validate()?;
             menu::run(
@@ -242,13 +188,6 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn migrate_config_if_needed(using_default_config: bool, path: &std::path::Path) -> Result<()> {
-    if using_default_config {
-        config::migrate_legacy_config(path)?;
-    }
-    Ok(())
-}
-
 fn load_config(path: &std::path::Path) -> Result<Config> {
     Config::load(path).with_context(|| {
         format!(
@@ -261,11 +200,9 @@ fn load_config(path: &std::path::Path) -> Result<Config> {
 impl From<SetupProvider> for setup::ProviderChoice {
     fn from(value: SetupProvider) -> Self {
         match value {
-            SetupProvider::None => Self::None,
-            SetupProvider::Openai => Self::OpenAi,
-            SetupProvider::Anthropic => Self::Anthropic,
-            SetupProvider::Openrouter => Self::OpenRouter,
             SetupProvider::Deepseek => Self::DeepSeek,
+            SetupProvider::Openai => Self::OpenAi,
+            SetupProvider::Openrouter => Self::OpenRouter,
             SetupProvider::Custom => Self::Custom,
         }
     }
