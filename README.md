@@ -41,7 +41,18 @@ error-detection or command-execution path.
 ## Downloads
 
 Download precompiled packages:
-macOS Apple Silicon: [link](https://github.com/RamNathaniel/shmart/releases/latest/download/shmart-macos-arm64)
+
+- macOS Apple Silicon: [shmart-macos-arm64](https://github.com/RamNathaniel/shmart/releases/latest/download/shmart-macos-arm64)
+- Linux x86_64: [shmart-linux-x86_64](https://github.com/RamNathaniel/shmart/releases/latest/download/shmart-linux-x86_64)
+
+Linux install:
+
+```bash
+curl -L -o shmart https://github.com/RamNathaniel/shmart/releases/latest/download/shmart-linux-x86_64
+chmod +x shmart
+sudo mv shmart /usr/local/bin/shmart
+shmart --help
+```
 
 ## Build yourself
 
